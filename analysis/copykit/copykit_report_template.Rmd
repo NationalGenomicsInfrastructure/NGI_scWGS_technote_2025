@@ -1,0 +1,159 @@
+---
+title: "Copykit Report"
+author: "Pontus Höjer"
+date: "`r format(Sys.time(), '%Y-%m-%d')`"
+output:
+  html_document:
+    toc: true
+params:
+  rds: "copykit_2M_1Mb.rds"
+  sample.tsv: "../../sample_info.tsv"
+  prefix: "copykit"
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = `r paste0(params$prefix,'_report.html')`) })
+---
+
+```{r load_libraries, message=FALSE}
+library("copykit")
+library("S4Vectors")
+library("knitr")
+
+options(knitr.kable.max_rows = 30)
+```
+
+```{r version}
+packageVersion("copykit")
+```
+
+# Pre-processing
+```{r preproc}
+mm1s <- readRDS(params$rds)
+
+# Add sample info
+sample_info <- read.csv(params$sample.tsv, sep="\t")
+names(sample_info)[1] <- "sample"
+colData(mm1s) <- merge(colData(mm1s), sample_info, by="sample")
+
+# Set names
+colnames(mm1s) <- colData(mm1s)$sample
+```
+
+```{r show_table, results='asis'}
+
+knitr::kable(colData(mm1s), caption = "Sample info")
+```
+
+```{r smoothing}
+# Skip smoothing for now
+#mm1s <- knnSmooth(mm1s)
+```
+
+```{r pca}
+mm1s <- runPca(mm1s, assay = "logr")
+```
+
+# Infer copy number
+```{r infer}
+mm1s <- calcInteger(mm1s,  method = 'fixed', ploidy_value = 2)
+```
+
+
+# QC
+```{r plot_metrics}
+plotMetrics(mm1s, metric = c("overdispersion", 
+                              "breakpoint_count",
+                              "reads_assigned_bins"),
+            label = "Kit")
+```
+
+```{r plot_pca}
+print(plotPca(mm1s, label = "Kit"))
+print(plotPca(mm1s, label = "IsSingleCell"))
+```
+
+
+```{r plot_ratio}
+for (sample in colnames(mm1s)) {
+  print(plotRatio(mm1s, sample))
+}
+```
+
+```{r plot_heatmap}
+plotHeatmap(mm1s, assay = 'segment_ratios', label = c('Kit', 'IsSingleCell'))
+```
+
+
+```{r plot_heatmap_cn}
+plotHeatmap(mm1s, assay = 'integer', label = c('Kit', 'IsSingleCell'))
+```
+
+# Export CNV data
+
+Using scripts from article:
+
+Kalef-Ezra, E., Turan, Z.G., Perez-Rodriguez, D. et al. Single-cell somatic copy number variants in brain using different amplification methods and reference genomes. Commun Biol 7, 1288 (2024). https://doi.org/10.1038/s42003-024-06940-w
+
+source: 
+ - https://github.com/zgturan/scWGA_comp/blob/main/scripts/64_Copykit_Script.R 
+ - https://github.com/zgturan/scWGA_comp/blob/main/scripts/65_write_cn_segments.R
+
+```{r export}
+# 1. Use integer from data set generted by copykit pipeline.
+#    Load file to see that it's generated:
+cns <- mm1s@assays@data@listData[["integer"]]
+
+# 2. obtain genomic segements by the function "rowrange"
+rowrange <- rowRanges(mm1s)
+
+# 3. Write TSV files
+cn_file <- paste0(params$prefix, "_cn.tsv")
+write.table(cns, file = cn_file, sep = "\t", row.names = F) 
+
+rowranges_file <- paste0(params$prefix, "_rowrange.tsv")
+write.table(rowrange, file = rowranges_file, sep = "\t", row.names = F) 
+
+# 4. Write copy number segments
+# source: https://github.com/zgturan/scWGA_comp/blob/main/scripts/65_write_cn_segments.R
+
+# TODO - this reads the newly written files, but should be done in the same script
+cns <- read.delim(file = cn_file, as.is = T)
+rowrange <- read.delim(file = rowranges_file, as.is = T)
+
+# Get the run length encoding of the copy number data for each cell
+rlecn <- apply(X = cns, MARGIN = 2, FUN = Rle)
+
+outls <- lapply(
+  X = rlecn, 
+  rowr_df = rowrange, 
+  FUN = function(x, rowr_df) {
+    data.frame(
+      chr = rowr_df[start(x), "seqnames"], 
+      start = rowr_df[start(x), "start"],
+      end = rowr_df[end(x), "end"],
+      copy_number = runValue(x)
+    )
+  }
+)
+
+outdir <- paste0(params$prefix, "_copy_numbers")
+dir.create(outdir, showWarnings = FALSE)
+
+# Write the copy number segments to TSV files
+mapply(
+  cndata = outls, 
+  cellnames = names(outls), 
+  MoreArgs = list(outdir = outdir), 
+  FUN = function(cndata, cellnames, outdir) {
+    write.table(
+      x = cndata,
+      file = paste0(outdir, "/", cellnames, ".tsv"), 
+      sep = "\t", 
+      quote = F, 
+      col.names = T, 
+      row.names = F)
+  }
+)
+```
+
+```{r exit}
+sessionInfo()
+```

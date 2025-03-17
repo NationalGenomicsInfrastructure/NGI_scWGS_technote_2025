@@ -1,0 +1,15 @@
+[2023-10-11][20:46:30][hificnv][INFO] Starting hificnv
+[2023-10-11][20:46:30][hificnv][INFO] cmdline: ./hificnv --threads 4 --exclude cnv.excluded_regions.common_50.hg38.bed --output-prefix /proj/uppstore2017170/b2013078/rawData/hg38/PacBio/231004_PacBio_MM_celllines/analysis/pr_023_003/hificnv/MM1S_excluded --ref /sw/data/igenomes/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa --bam /proj/uppstore2017170/b2013078/rawData/hg38/PacBio/231004_PacBio_MM_celllines/analysis/pr_023_003/pr_023_003.bam
+[2023-10-11][20:46:30][hificnv][INFO] Running on 4 threads
+[2023-10-11][20:46:30][hificnv][INFO] Reading reference genome from file '/sw/data/igenomes/Homo_sapiens/UCSC/hg38/Sequence/WholeGenomeFasta/genome.fa'
+[2023-10-11][20:46:38][hificnv][INFO] Reading excluded regions from file 'cnv.excluded_regions.common_50.hg38.bed'
+[2023-10-11][20:46:38][hificnv][INFO] Processing alignment file '/proj/uppstore2017170/b2013078/rawData/hg38/PacBio/231004_PacBio_MM_celllines/analysis/pr_023_003/pr_023_003.bam'
+[2023-10-11][20:50:52][hificnv][INFO] Writing depth track to bigwig file: '/proj/uppstore2017170/b2013078/rawData/hg38/PacBio/231004_PacBio_MM_celllines/analysis/pr_023_003/hificnv/MM1S_excluded.pr_023_003.depth.bw'
+[2023-10-11][20:50:52][hificnv][INFO] Segmenting copy number
+[2023-10-11][20:50:52][hificnv][INFO] Haploid coverage estimates for sample 'pr_023_003', iteration 1. Uncorrected: 12.612 GC-Corrected: 13.383
+[2023-10-11][20:50:55][hificnv][INFO] Haploid coverage estimates for sample 'pr_023_003', iteration 2. Uncorrected: 12.785 GC-Corrected: 13.566
+[2023-10-11][20:50:57][hificnv][INFO] Haploid coverage estimates for sample 'pr_023_003', iteration 3. Uncorrected: 12.787 GC-Corrected: 13.569
+[2023-10-11][20:50:59][hificnv][INFO] Haploid coverage estimates for sample 'pr_023_003', iteration 4. Uncorrected: 12.787 GC-Corrected: 13.569
+[2023-10-11][20:51:01][hificnv][INFO] Writing bedgraph copy number track to file: '/proj/uppstore2017170/b2013078/rawData/hg38/PacBio/231004_PacBio_MM_celllines/analysis/pr_023_003/hificnv/MM1S_excluded.pr_023_003.copynum.bedgraph'
+[2023-10-11][20:51:01][hificnv][INFO] Writing copy number variants to file: '/proj/uppstore2017170/b2013078/rawData/hg38/PacBio/231004_PacBio_MM_celllines/analysis/pr_023_003/hificnv/MM1S_excluded.pr_023_003.vcf.gz'
+[2023-10-11][20:51:01][hificnv][INFO] hificnv completed. Total Runtime: 00:04:30.777

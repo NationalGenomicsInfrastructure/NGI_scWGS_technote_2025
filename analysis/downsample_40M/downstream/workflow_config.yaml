@@ -1,0 +1,42 @@
+# Samples
+samples:
+  - "P33410_1001"
+  - "P33410_1002"
+  - "P33410_1003"
+  - "P33410_1004"
+  - "P33410_1005"
+  - "P33410_1006"
+  - "P33410_1008"
+  - "P33410_1009"
+  - "P33410_1010"
+  - "P33410_1011"
+  - "P33410_1012"
+  - "P33410_1013"
+  - "P33410_1014"
+  - "P33410_1015"
+  - "P33410_1016"
+  - "P33410_1017"
+  - "P33410_1018"
+  - "P33410_1019"
+  - "P33410_1020"
+  - "P33410_1021"
+  - "P33410_1022"
+  - "P33410_1024"
+
+# Paths
+cram_path: "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/sarek_GRCh38/outdir/preprocessing/markduplicates"
+fasta: "/sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Sequence/WholeGenomeFasta/genome.fa"
+genes_flat: "/sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Annotation/Genes/refFlat.txt.gz"
+excluded_regions: "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/resources/HiFiCNV_excluded_regions/cnv.excluded_regions.common_50.hg38.bed.gz"
+access_bed: "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/resources/cnvkit_data/access-10kb.hg38.bed"
+
+# Containers
+containers:
+  cnvkit: "/vulpes/ngi/containers/biocontainers/depot.galaxyproject.org-singularity-cnvkit-0.9.10--pyhdfd78af_0.img"
+  picard: "/vulpes/ngi/containers/biocontainers/singularity-picard-3.0.0--hdfd78af_1.img"
+  mosdepth: "/vulpes/ngi/containers/biocontainers/singularity-mosdepth-0.3.8--hd299d5a_0.img"
+  samtools: "/vulpes/common/ngi/containers/biocontainers/singularity-samtools-1.19.2--h50ea8bc_0.img"
+  multiqc: "/vulpes/common/ngi/containers/biocontainers/singularity-multiqc-1.21--pyhdfd78af_0.img"
+#  preseq: "/vulpes/ngi/containers/biocontainers/singularity-preseq-3.1.2--h445547b_2.img"
+  preseq: "/vulpes/ngi/containers/biocontainers/singularity-preseq-3.2.0--hdcf5f25_6.img"
+  bedtools: "/vulpes/ngi/containers/biocontainers/quay.io-singularity-bedtools-2.30.0--hc088bd4_0.img"

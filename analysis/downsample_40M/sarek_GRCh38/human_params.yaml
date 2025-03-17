@@ -1,0 +1,12 @@
+input: './human_samples.csv'
+outdir: './outdir'
+seq_center: 'NGI_Stockholm'
+multiqc_title: 'GA_24_11_scWGS_downsampled_GRCh38'
+igenomes_ignore: true
+fasta: /sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Sequence/WholeGenomeFasta/genome.fa
+fasta_fai: /sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Sequence/WholeGenomeFasta/genome.fa.fai
+bwa: /sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Sequence/BWAIndex/version0.6.0/
+email: pontus.hojer@scilifelab.se
+skip_tools: baserecalibrator
+trim_fastq: true
+aligner: bwa-mem

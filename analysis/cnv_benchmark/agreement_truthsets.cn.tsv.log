@@ -1,0 +1,14 @@
+INFO:__main__:Running cnv_agreement.py
+INFO:__main__: query: ../../resources/OGM_CNVs/cnv_calls.chr.seg
+INFO:__main__: truth: ../../resources/PacBioHiFi_pr_023_003_MM1S_hificnv/MM1S_excluded.pr_023_003.seg
+INFO:__main__: fai: ../../resources/GRCh38.genome
+INFO:__main__: ploidy: 2
+INFO:__main__: gl: False
+INFO:__main__:------------------------------
+INFO:__main__:Reading reference genome lengths...
+INFO:__main__:Truth CNVs: 100 ({0: 17, 1: 45, 3: 21, 5: 11, 4: 6})
+INFO:__main__:Processing OGM...
+INFO:__main__:Query CNVs: 75 ({1: 38, 3: 35, 4: 2})
+INFO:__main__:Chromosomes: chr1,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr19,chr2,chr20,chr21,chr22,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 2,914,943,000 / 2,950,669,132 (98.79%)
+INFO:__main__:------------------------------

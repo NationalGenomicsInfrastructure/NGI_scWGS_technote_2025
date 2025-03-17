@@ -1,0 +1,55 @@
+INFO:__main__:Running cnv_agreement.py
+INFO:__main__: query: ../copykit/copykit/full/220kb.seg
+INFO:__main__: truth: ../../resources/PacBioHiFi_pr_023_003_MM1S_hificnv/MM1S_excluded.pr_023_003.seg
+INFO:__main__: fai: ../../resources/GRCh38.genome
+INFO:__main__: ploidy: 2
+INFO:__main__: gl: False
+INFO:__main__:------------------------------
+INFO:__main__:Reading reference genome lengths...
+INFO:__main__:Truth CNVs: 100 ({0: 17, 1: 45, 3: 21, 5: 11, 4: 6})
+INFO:__main__:Processing P33410_1001...
+INFO:__main__:Query CNVs: 20 ({1: 15, 3: 5})
+INFO:__main__:Agreement: 2,472,024,931 / 2,950,669,132 (83.78%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1002...
+INFO:__main__:Query CNVs: 36 ({3: 9, 1: 18, 4: 5, 0: 4})
+INFO:__main__:Agreement: 2,001,227,970 / 3,031,042,417 (66.02%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1003...
+INFO:__main__:Query CNVs: 26 ({3: 12, 1: 11, 0: 3})
+INFO:__main__:Agreement: 1,641,984,533 / 2,950,669,132 (55.65%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1004...
+INFO:__main__:Query CNVs: 16 ({1: 10, 3: 4, 4: 1, 0: 1})
+INFO:__main__:Agreement: 2,574,500,930 / 2,950,669,132 (87.25%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1005...
+INFO:__main__:Query CNVs: 17 ({1: 12, 0: 2, 3: 3})
+INFO:__main__:Agreement: 2,456,106,439 / 2,950,669,132 (83.24%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1006...
+INFO:__main__:Query CNVs: 51 ({4: 3, 3: 14, 1: 22, 0: 12})
+INFO:__main__:Agreement: 1,710,060,341 / 3,031,042,417 (56.42%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1008...
+INFO:__main__:Query CNVs: 16 ({1: 11, 3: 5})
+INFO:__main__:Agreement: 2,552,732,407 / 3,031,042,417 (84.22%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1009...
+INFO:__main__:Query CNVs: 14 ({1: 10, 3: 4})
+INFO:__main__:Agreement: 2,670,629,150 / 2,950,669,132 (90.51%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1010...
+INFO:__main__:Query CNVs: 52 ({1: 23, 3: 18, 5: 2, 0: 9})
+WARNING:__main__:End position 50525535 is greater than chromosome length 46709983.
+WARNING:__main__:Truncating CNV to chromosome length.
+INFO:__main__:Agreement: 1,591,541,478 / 3,031,042,417 (52.51%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1011...
+INFO:__main__:Query CNVs: 27 ({0: 8, 1: 9, 4: 2, 3: 7, 5: 1})
+INFO:__main__:Agreement: 1,517,517,085 / 3,031,042,417 (50.07%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1012...
+INFO:__main__:Query CNVs: 16 ({1: 11, 3: 5})
+INFO:__main__:Agreement: 2,826,325,314 / 2,950,669,132 (95.79%)
+INFO:__main__:------------------------------

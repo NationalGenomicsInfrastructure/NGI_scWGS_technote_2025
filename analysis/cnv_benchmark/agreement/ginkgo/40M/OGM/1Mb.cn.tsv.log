@@ -1,0 +1,129 @@
+INFO:__main__:Running cnv_agreement.py
+INFO:__main__: query: ../basejumper/40M/CNV_Ginkgo_tertiary_data/Ginkgo_CNV1.seg
+INFO:__main__: truth: ../../resources/OGM_CNVs/cnv_calls.chr.seg
+INFO:__main__: fai: ../../resources/GRCh38.genome
+INFO:__main__: ploidy: 2
+INFO:__main__: gl: False
+INFO:__main__:------------------------------
+INFO:__main__:Reading reference genome lengths...
+INFO:__main__:Truth CNVs: 75 ({1: 38, 3: 35, 4: 2})
+INFO:__main__:Processing P33410_1001...
+INFO:__main__:Query CNVs: 26 ({1: 16, 4: 1, 3: 8, 5: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr12,chr13,chr14,chr16,chr19,chr2,chr21,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,984,080,596 / 2,515,071,245 (78.89%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1002...
+INFO:__main__:Query CNVs: 27 ({1: 16, 3: 7, 4: 1, 0: 3})
+INFO:__main__:Chromosomes: chr1,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr19,chr2,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,452,923,693 / 2,520,070,816 (57.65%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1003...
+INFO:__main__:Query CNVs: 37 ({3: 14, 1: 16, 0: 4, 4: 2, 5: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr19,chr2,chr20,chr21,chr22,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,120,650,830 / 2,769,130,873 (40.47%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1004...
+INFO:__main__:Query CNVs: 27 ({1: 15, 3: 7, 4: 1, 0: 2, 5: 1, 6: 1})
+INFO:__main__:Chromosomes: chr1,chr11,chr12,chr13,chr14,chr16,chr19,chr2,chr21,chr22,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 2,088,633,972 / 2,567,178,913 (81.36%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1005...
+INFO:__main__:Query CNVs: 29 ({1: 14, 3: 12, 0: 2, 4: 1})
+INFO:__main__:Chromosomes: chr1,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr2,chr21,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,417,466,501 / 2,781,982,360 (50.95%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1006...
+INFO:__main__:Query CNVs: 41 ({4: 2, 3: 14, 1: 19, 0: 5, 5: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr11,chr12,chr13,chr14,chr16,chr17,chr18,chr19,chr2,chr20,chr21,chr22,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,124,403,783 / 2,929,051,228 (38.39%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1007...
+INFO:__main__:Query CNVs: 1 ({3: 1})
+INFO:__main__:Chromosomes: chr1,chr12,chr13,chr14,chr16,chr19,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,356,272,985 / 1,957,542,035 (69.28%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1008...
+INFO:__main__:Query CNVs: 22 ({1: 13, 3: 9})
+INFO:__main__:Chromosomes: chr1,chr10,chr11,chr12,chr13,chr14,chr16,chr18,chr19,chr2,chr21,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,823,753,824 / 2,730,531,152 (66.79%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1009...
+INFO:__main__:Query CNVs: 20 ({1: 12, 4: 2, 3: 5, 5: 1})
+INFO:__main__:Chromosomes: chr1,chr12,chr13,chr14,chr16,chr19,chr2,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,879,882,556 / 2,199,735,564 (85.46%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1010...
+INFO:__main__:Query CNVs: 47 ({1: 23, 3: 19, 0: 4, 6: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr18,chr19,chr2,chr20,chr21,chr22,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,294,318,339 / 2,947,784,976 (43.91%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1011...
+INFO:__main__:Query CNVs: 47 ({1: 21, 0: 9, 3: 12, 4: 3, 5: 1, 6: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr2,chr20,chr21,chr22,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,207,383,325 / 3,031,042,417 (39.83%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1012...
+INFO:__main__:Query CNVs: 18 ({1: 10, 3: 6, 4: 2})
+INFO:__main__:Chromosomes: chr1,chr10,chr12,chr13,chr14,chr16,chr19,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,916,467,029 / 2,091,339,457 (91.64%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1013...
+INFO:__main__:Query CNVs: 18 ({1: 11, 3: 6, 6: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr12,chr13,chr14,chr16,chr19,chr2,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 2,073,024,464 / 2,333,532,986 (88.84%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1014...
+INFO:__main__:Query CNVs: 17 ({1: 11, 3: 5, 6: 1})
+INFO:__main__:Chromosomes: chr1,chr12,chr13,chr14,chr16,chr19,chr2,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,949,389,395 / 2,199,735,564 (88.62%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1015...
+INFO:__main__:Query CNVs: 19 ({1: 11, 3: 6, 6: 2})
+INFO:__main__:Chromosomes: chr1,chr10,chr12,chr13,chr14,chr16,chr19,chr2,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 2,061,997,198 / 2,333,532,986 (88.36%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1016...
+INFO:__main__:Query CNVs: 35 ({1: 25, 0: 5, 3: 3, 8: 1, 4: 1})
+INFO:__main__:Chromosomes: chr1,chr11,chr12,chr13,chr14,chr16,chr17,chr18,chr19,chr2,chr21,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 2,305,359,210 / 2,679,991,171 (86.02%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1017...
+INFO:__main__:Query CNVs: 18 ({1: 10, 3: 6, 6: 1, 4: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr12,chr13,chr14,chr16,chr19,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,976,268,529 / 2,091,339,457 (94.50%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1018...
+INFO:__main__:Query CNVs: 18 ({1: 10, 3: 7, 5: 1})
+INFO:__main__:Chromosomes: chr1,chr12,chr13,chr14,chr16,chr19,chr2,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,931,076,109 / 2,199,735,564 (87.79%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1019...
+INFO:__main__:Query CNVs: 89 ({3: 19, 1: 6, 4: 10, 0: 45, 5: 9})
+INFO:__main__:Chromosomes: chr1,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr2,chr20,chr21,chr22,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 976,132,162 / 3,031,042,417 (32.20%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1020...
+INFO:__main__:Query CNVs: 53 ({3: 16, 1: 6, 0: 26, 4: 4, 5: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr2,chr20,chr21,chr22,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,529,359,020 / 3,031,042,417 (50.46%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1021...
+INFO:__main__:Query CNVs: 18 ({1: 11, 3: 6, 6: 1})
+INFO:__main__:Chromosomes: chr1,chr12,chr13,chr14,chr16,chr19,chr2,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,948,168,640 / 2,199,735,564 (88.56%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1022...
+INFO:__main__:Query CNVs: 19 ({1: 11, 6: 2, 3: 5, 4: 1})
+INFO:__main__:Chromosomes: chr1,chr12,chr13,chr14,chr15,chr16,chr19,chr2,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 2,013,658,771 / 2,301,726,753 (87.48%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1023...
+INFO:__main__:Query CNVs: 1 ({3: 1})
+INFO:__main__:Chromosomes: chr1,chr12,chr13,chr14,chr16,chr19,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,356,272,985 / 1,957,542,035 (69.28%)
+INFO:__main__:------------------------------
+INFO:__main__:Processing P33410_1024...
+INFO:__main__:Query CNVs: 20 ({1: 13, 3: 5, 4: 1, 6: 1})
+INFO:__main__:Chromosomes: chr1,chr10,chr12,chr13,chr14,chr16,chr19,chr21,chr3,chr4,chr6,chr7,chr8,chr9,chrX
+INFO:__main__:Agreement: 1,772,053,557 / 2,091,339,457 (84.73%)
+INFO:__main__:------------------------------

@@ -1,0 +1,181 @@
+"""
+Snakemake file for running CopyKit
+
+load modules:
+
+    ml bioinfo-tools snakemake python
+
+sbatch command:
+    
+    sbatch -A ngi2016004 -J copykit -n 22 -p core -t 1-00:00:00 --wrap "snakemake -p -j 22 --use-singularity -k --rerun-incomplete" --mail-user phojer@kth.se --mail-type ALL
+"""
+
+from pathlib import Path
+
+all_samples = [
+    "P33410_1001",
+    "P33410_1002",
+    "P33410_1003",
+    "P33410_1004",
+    "P33410_1005",
+    "P33410_1006",
+    "P33410_1008",
+    "P33410_1009",
+    "P33410_1010",
+    "P33410_1011",
+    "P33410_1012",
+    "P33410_1013",
+    "P33410_1014",
+    "P33410_1015",
+    "P33410_1016",
+    "P33410_1017",
+    "P33410_1018",
+    "P33410_1019",
+    "P33410_1020",
+    "P33410_1021",
+    "P33410_1022",
+    "P33410_1024"
+]
+
+qiagen_samples = [
+    "P33410_1001",
+    "P33410_1002",
+    "P33410_1003",
+    "P33410_1004",
+    "P33410_1005",
+    "P33410_1006",
+    "P33410_1008",
+    "P33410_1009",
+    "P33410_1010",
+    "P33410_1011",
+    "P33410_1012",
+]
+
+data_samples = {
+    "2M": all_samples,
+    "40M": all_samples,
+    "full": qiagen_samples
+}
+
+cram_paths = {
+    "2M": Path("/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_qc/sarek_GRCh38/outdir/preprocessing/markduplicates"),
+    "40M": Path("/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/sarek_GRCh38/outdir/preprocessing/markduplicates"),
+    "full": Path("/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/qiagen_repli_g_full/sarek/preprocessing/markduplicates"),
+}
+
+fasta = "/sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Sequence/WholeGenomeFasta/genome.fa"
+
+seg2vcf = "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/scripts/seg2vcf.py"
+
+# Containers
+samtools = "/vulpes/common/ngi/containers/biocontainers/singularity-samtools-1.19.2--h50ea8bc_0.img"
+copykit = "/vulpes/proj/ngis/ngi2016004/private/pontus/tools/seedgeorge-copykit-0.1.2.sif"
+
+def get_cram(path, sample):
+    return path / f"{sample}/{sample}.md.cram" 
+
+resolutions = ["110kb", "220kb", "500kb", "1Mb"]
+
+rule all:
+    input:
+        expand("copykit/{data}/{resolution}_report.html", resolution=resolutions, data=data_samples.keys()),
+        expand("copykit/{data}/{resolution}.seg", resolution=resolutions, data=data_samples.keys()),
+        expand("copykit/{data}/{resolution}_cnv_vcfs", resolution=resolutions, data=data_samples.keys()),
+
+
+rule cram_to_bam:
+    input:
+        cram = lambda wc: get_cram(cram_paths[wc.data], wc.sample)
+    output:
+        bam = "bams/{data}/{sample}.bam",
+        bai = "bams/{data}/{sample}.bam.bai"
+    singularity: samtools
+    threads: 2
+    params:
+        ref = fasta
+    shell:
+        "samtools view"
+        " -@ {threads}"
+        " -f 2" # Only properly paired reads
+        " -bh"
+        " -T {params.ref}"
+        " {input.cram}"
+        " -o {output.bam}"
+        " && "
+        "samtools index {output.bam}"
+
+
+rule copykit_runVarbin:
+    input:  
+        bams = lambda wc: [f"bams/{wc.data}/{sample}.bam" for sample in data_samples[wc.data]]
+    output:
+        rds = "copykit/{data}/{resolution}.rds"
+    params:
+        resolution = lambda wc: wc.resolution,
+        dir = lambda wc: f"bams/{wc.data}"
+    threads: 1
+    shadow: "minimal"
+    log: "copykit/{data}/{resolution}.log"
+    singularity: copykit
+    script: "copykit_runVarbin.R"
+
+
+rule copykit_report:
+    input:
+        rds = "copykit/{data}/{resolution}.rds"
+    output:
+        html = "copykit/{data}/{resolution}_report.html",
+        cn_tsv = "copykit/{data}/{resolution}_cn.tsv",
+        row_tsv = "copykit/{data}/{resolution}_rowrange.tsv",
+        cn = directory("copykit/{data}/{resolution}_copy_numbers")
+    singularity: copykit
+    log: "copykit/{data}/{resolution}_report.log"
+    params:
+        template = "copykit_report_template.Rmd",
+        prefix = "copykit/{data}/{resolution}"
+    shell:
+        "Rscript"
+        " -e 'rmarkdown::render("
+        "   \"{params.template}\","
+        "   params = list(rds = \"{input.rds}\", prefix = \"{params.prefix}\"),"
+        "   output_file = \"{output.html}\""
+        " )' &> {log}"
+
+
+rule write_seg_file:
+    input:
+        cn = "copykit/{data}/{resolution}_copy_numbers"
+    output:
+        seg = "copykit/{data}/{resolution}.seg"
+    run:
+        import glob
+        with open(output.seg, "w") as f:
+            print("#type=COPY_NUMBER", file=f)
+            print("id\tchromosome\tstart\tend\tcn", file=f)
+            for cn_file in sorted(Path(input.cn).rglob("*.tsv")):
+                sample = cn_file.stem
+                with open(cn_file) as cn:
+                    next(cn) # Skip header
+                    for line in cn:
+                        els = line.strip().split("\t")
+                        print(sample, *els, sep="\t", file=f)
+
+
+rule seg_to_vcf:
+    input:
+        seg = "copykit/{data}/{resolution}.seg"
+    output:
+        dir = directory("copykit/{data}/{resolution}_cnv_vcfs")
+    log: "copykit/{data}/{resolution}_cnv_vcfs.log"
+    params:
+        script = seg2vcf,
+        fai = fasta + ".fai",
+        ploidy = 2,
+    shell:
+        "python"
+        " {params.script}"
+        " {input.seg}"
+        " --outdir {output.dir}"
+        " --fai {params.fai}"
+        " --ploidy {params.ploidy}"
+        " &> {log}"

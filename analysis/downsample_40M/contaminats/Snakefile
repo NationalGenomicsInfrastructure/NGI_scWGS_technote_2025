@@ -1,0 +1,50 @@
+"""
+Snakemake file for downstream analysis of 2M downsampled samples.
+
+load modules:
+
+    ml bioinfo-tools snakemake
+
+sbatch command:
+    
+    sbatch -A ngi2016004 -J down_qc -n 12 -p core -t 1-00:00:00 --wrap "snakemake -p -j 12 --use-singularity -k --rerun-incomplete" --mail-user phojer@kth.se --mail-type ALL
+"""
+
+samples = [
+    "P33410_1001",
+    "P33410_1002",
+    "P33410_1003",
+    "P33410_1004",
+    "P33410_1005",
+    "P33410_1006",
+    "P33410_1008",
+    "P33410_1009",
+    "P33410_1010",
+    "P33410_1011",
+    "P33410_1012",
+    "P33410_1013",
+    "P33410_1014",
+    "P33410_1015",
+    "P33410_1016",
+    "P33410_1017",
+    "P33410_1018",
+    "P33410_1019",
+    "P33410_1020",
+    "P33410_1021",
+    "P33410_1022",
+    "P33410_1024",
+]
+
+rule all:
+    input:
+        "multiqc_report.html",
+
+
+module main_workflow:
+    snakefile:
+        # here, plain paths, URLs and the special markers 
+        # for code hosting providers (see below) are possible.
+        "../../downsample_qc/contaminats/Snakefile"
+    config: config
+
+use rule * from main_workflow exclude all as main_*

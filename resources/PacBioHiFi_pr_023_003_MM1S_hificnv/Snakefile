@@ -1,0 +1,34 @@
+
+
+rule all:
+    input:
+        "MM1S_excluded.pr_023_003.seg"
+
+
+rule vcf_to_seg:
+    """
+    From IGV documentation: https://igv.org/doc/desktop/#FileFormats/DataTracks/#seg 
+
+        A SEG file (segmented data; .seg or .cbs) is a tab-delimited text file that lists loci 
+        and associated numeric values. The first row contains column headings, and each 
+        subsequent row contains a locus and an associated numeric value. IGV ignores the 
+        column headings. It reads the first four columns as track name, chromosome, start 
+        location, and end location. It reads the last column as the numeric value for 
+        that locus (if the value is non-numeric, IGV ignores the row). IGV ignores all 
+        other columns.
+
+    Example: https://igv.org/doc/desktop/#FileFormats/ExampleFiles/example.seg
+    """
+    input:
+        bedgraph = "MM1S_excluded.pr_023_003.copynum.bedgraph"
+    output:
+        seg = "MM1S_excluded.pr_023_003.seg"
+    shell:
+        "echo '#type=COPY_NUMBER' > {output}"
+        " && "
+        "echo 'ID\tchrom\tstart\tend\tcopy_number' >> {output}"
+        " && "
+        "grep -v ^# {input}"
+        " | "
+        "awk '{{OFS=\"\t\"; print \"PacBio_HiFi_HiFiCNV\", $1, $2, $3, $4}}'"
+        " >> {output}"

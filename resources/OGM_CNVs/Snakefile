@@ -1,0 +1,219 @@
+
+# FILE: cnv_rcmap_exp.txt
+# Columns
+#  -  1 CMapId
+#  -  2 ContigLength
+#  -  3 NumSites
+#  -  4 SiteID
+#  -  5 LabelChannel
+#  -  6 Position
+#  -  7 StdDev
+#  -  8 Coverage
+#  -  9 Occurrence
+#  -  10 ScaledCoverage
+#  -  11 NormalizedCoverage
+#  -  12 CopyNumber
+#  -  13 fractionalCopyNumber
+#  -  14 MeanCov
+
+# FILE: cnv_calls.txt
+# Columns
+#  -  1 Id
+#  -  2 Chromosome
+#  -  3 Start
+#  -  4 End
+#  -  5 Size
+#  -  6 Type
+#  -  7 fractionalCopyNumber
+#  -  8 CopyNumber
+#  -  9 Confidence
+#  -  10 CNFoldChange
+#  -  11 Mask_overlap_fract
+#  -  12 Algorithm
+#  -  13 OverlapGenes
+#  -  14 NearestNonOverlapGene
+#  -  15 NearestNonOverlapGeneDistance
+#  -  16 num_overlap_DGV_calls
+#  -  17 UCSC_web_link1
+#  -  18 ISCN
+
+rcmap_column_to_index = {
+    "CMapId": 1,
+    "ContigLength": 2,
+    "NumSites": 3,
+    "SiteID": 4,
+    "LabelChannel": 5,
+    "Position": 6,
+    "StdDev": 7,
+    "Coverage": 8,
+    "Occurrence": 9,
+    "ScaledCoverage": 10,
+    "NormalizedCoverage": 11,
+    "CopyNumber": 12,
+    "fractionalCopyNumber": 13,
+    "MeanCov": 14
+}
+
+rcmap_cols_convert = [
+    "Coverage",
+    "Occurrence",
+    "ScaledCoverage",
+    "NormalizedCoverage",
+    "CopyNumber",
+    "fractionalCopyNumber",
+    "MeanCov"
+]
+
+calls_columns_to_index = {
+    "Id": 1,
+    "Chromosome": 2,
+    "Start": 3,
+    "End": 4,
+    "Size": 5,
+    "Type": 6,
+    "fractionalCopyNumber": 7,
+    "CopyNumber": 8,
+    "Confidence": 9,
+    "CNFoldChange": 10,
+    "Mask_overlap_fract": 11,
+    "Algorithm": 12,
+    "OverlapGenes": 13,
+    "NearestNonOverlapGene": 14,
+    "NearestNonOverlapGeneDistance": 15,
+    "num_overlap_DGV_calls": 16,
+    "UCSC_web_link1": 17,
+    "ISCN": 18
+}
+
+calls_cols_convert = [
+    "CopyNumber",
+]
+
+
+rule all:
+    input:
+        expand("rcmap_bedgraph/cnv_rcmap_exp.{column}.bedgraph", column=rcmap_cols_convert),
+        expand("calls_bedgraph/cnv_calls.{column}.bedgraph", column=calls_cols_convert),
+        "cnv_calls.seg"
+
+
+rule calls_to_bedgraph:
+    input:
+        "cnv_calls.txt"
+    output:
+        "calls_bedgraph/cnv_calls.{column}.bedgraph"
+    params:
+        column = lambda wildcards: calls_columns_to_index[wildcards.column],
+    shell:
+        "tail -n +7 {input}"
+        " | "
+        "cut -f 2,3,4,{params.column}"
+        " | "
+        # Add chr to chromosome names
+        "sed 's/^/chr/'"
+        " | "
+        # Rename chromosome 23 and 24 to X and Y
+        "sed 's/^chr23/chrX/g;s/^chr24/chrY/g'"
+        " > {output}"
+
+
+rule rcmap_convert_to_bedgraph:
+    input:
+        "cnv_rcmap_exp.txt"
+    output:
+        "rcmap_bedgraph/cnv_rcmap_exp.{column}.bedgraph"
+    params:
+        column = lambda wildcards: rcmap_column_to_index[wildcards.column],
+        slop = 5
+    shell:
+        "tail -n +4 {input}"
+        " | "
+        "cut -f 1,6,{params.column}"
+        " | "
+        "awk '{{OFS=\"\t\"; print \"chr\"$1, int($2-{params.slop}), int($2+{params.slop}), $3}}'"
+        " | "
+        # Rename chromosome 23 and 24 to X and Y
+        "sed 's/^chr23/chrX/g;s/^chr24/chrY/g'"
+        " > {output}"
+
+
+rule download_binary:
+    output:
+        "bedGraphToBigWig"
+    shell:
+        "wget https://hgdownload.soe.ucsc.edu/admin/exe/macOSX.arm64/bedGraphToBigWig"
+        " && "
+        "chmod +x bedGraphToBigWig"
+
+
+rule GRCh38_genome:
+    input:
+        "cnv_rcmap_exp.txt"
+    output:
+        "GRCh38.genome"
+    shell:
+        "tail -n +4 {input}"
+        " | "
+        "cut -f 1,2"
+        " | "
+        "uniq"
+        " | "
+        "awk '{{OFS=\"\t\"; print \"chr\"$1, $2}}'"
+        " | "
+        # Rename chromosome 23 and 24 to X and Y
+        "sed 's/^chr23/chrX/g;s/^chr24/chrY/g'"
+        " > {output}"
+
+
+rule bedgraph_to_bigwig:
+    input:
+        binary = "bedGraphToBigWig",
+        bedgraph = "{prefix}.bedgraph",
+        genome = "GRCh38.genome"
+    output:
+        "{prefix}.bw"
+    shell:
+        "./{input.binary} {input.bedgraph} {input.genome} {output}"
+
+
+rule calls_to_seg:
+    """
+    From IGV documentation: https://igv.org/doc/desktop/#FileFormats/DataTracks/#seg 
+
+        A SEG file (segmented data; .seg or .cbs) is a tab-delimited text file that lists loci 
+        and associated numeric values. The first row contains column headings, and each 
+        subsequent row contains a locus and an associated numeric value. IGV ignores the 
+        column headings. It reads the first four columns as track name, chromosome, start 
+        location, and end location. It reads the last column as the numeric value for 
+        that locus (if the value is non-numeric, IGV ignores the row). IGV ignores all 
+        other columns.
+
+    Example: https://igv.org/doc/desktop/#FileFormats/ExampleFiles/example.seg
+    """
+    input:
+        "cnv_calls.txt"
+    output:
+        "cnv_calls.seg"
+    shell:
+        "echo '#type=COPY_NUMBER' > {output}"
+        " && "
+        "grep -v ^# {input}"
+        " | "
+        "awk '{{OFS=\"\t\"; print \"OGM\", $2, $3, $4, $8}}'"
+        " >> {output}"
+
+rule seg_add_chr:
+    # Add chr to chromosome names and rename chromosome 23 to X
+    input:
+        "cnv_calls.seg"
+    output:
+        "cnv_calls.chr.seg"
+    shell:
+        "head -n 2 {input} > {output}"
+        " && "
+        "tail -n +3 {input}"
+        " | "
+        "awk '{{OFS=\"\t\"; print $1, \"chr\"$2, $3, $4, $5}}'"
+        " | "
+        "sed 's|chr23|chrX|g'"
+        " >> {output}"

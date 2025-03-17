@@ -1,0 +1,787 @@
+"""
+Snakemake file for downstream analysis of 2M downsampled samples.
+
+load modules:
+
+    ml bioinfo-tools snakemake
+
+sbatch command:
+    
+    sbatch -A ngi2016004 -J down_qc -n 12 -p core -t 1-00:00:00 --wrap "snakemake -p -j 12 --use-singularity -k --rerun-incomplete" --mail-user phojer@kth.se --mail-type ALL
+"""
+from snakemake.utils import min_version
+
+min_version("6.0")
+
+configfile: "workflow_config.yaml"
+
+# samples = [
+#     "P33410_1001",
+#     "P33410_1002",
+#     "P33410_1003",
+#     "P33410_1004",
+#     "P33410_1005",
+#     "P33410_1006",
+#     "P33410_1008",
+#     "P33410_1009",
+#     "P33410_1010",
+#     "P33410_1011",
+#     "P33410_1012",
+#     "P33410_1013",
+#     "P33410_1014",
+#     "P33410_1015",
+#     "P33410_1016",
+#     "P33410_1017",
+#     "P33410_1018",
+#     "P33410_1019",
+#     "P33410_1020",
+#     "P33410_1021",
+#     "P33410_1022",
+#     "P33410_1024"
+# ]
+
+# cram_path = "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_qc/sarek_GRCh38/outdir/preprocessing/markduplicates"
+
+# fasta = "/sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Sequence/WholeGenomeFasta/genome.fa",
+    
+# genes_flat = "/sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Annotation/Genes/refFlat.txt.gz",
+
+# excluded_regions = "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/resources/HiFiCNV_excluded_regions/cnv.excluded_regions.common_50.hg38.bed.gz",
+# access_bed = "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/resources/cnvkit_data/access-10kb.hg38.bed"
+
+
+# # Containers
+# cnvkit = "/vulpes/ngi/containers/biocontainers/depot.galaxyproject.org-singularity-cnvkit-0.9.10--pyhdfd78af_0.img"
+# picard = "/vulpes/ngi/containers/biocontainers/singularity-picard-3.0.0--hdfd78af_1.img"
+# mosdepth = "/vulpes/ngi/containers/biocontainers/singularity-mosdepth-0.3.8--hd299d5a_0.img"
+# samtools = "/vulpes/common/ngi/containers/biocontainers/singularity-samtools-1.19.2--h50ea8bc_0.img"
+# multiqc = "/vulpes/common/ngi/containers/biocontainers/singularity-multiqc-1.21--pyhdfd78af_0.img"
+# preseq = "/vulpes/ngi/containers/biocontainers/singularity-preseq-3.1.2--h445547b_2.img"
+# bedtools = "/vulpes/ngi/containers/biocontainers/quay.io-singularity-bedtools-2.30.0--hc088bd4_0.img"
+
+ftypes = ["", ".filtered", ".call", ".cnv"]
+
+wildcard_constraints:
+    sample = "|".join(config["samples"]),
+    ftype = "|".join(ftypes)
+
+
+rule all:
+    input:
+        "multiqc_report.html",
+        expand("mosdepth_100kb/bedgraph/{sample}.regions.bedgraph", sample=config["samples"]),
+        expand("cnvkit/{sample}/{sample}.regions.cns", sample=config["samples"]),
+        expand("cnvkit/heatmap_GRCh38{ftype}_mqc.png", ftype=ftypes),
+        expand("cnvkit/{sample}/{sample}.regions.filtered.bintest.cns", sample=config["samples"]),
+        expand("cnvkit/{sample}/{sample}.regions.log2.bedgraph", sample=config["samples"]),
+        "cnvkit/metrics.tsv",
+        expand("cnvkit/GRCh38{ftype}.seg", ftype=ftypes),
+        expand("cnvkit/{sample}/{sample}.regions{ftype}.cns", sample=config["samples"], ftype=ftypes),
+        expand("cnvkit/{sample}/{sample}.regions{ftype}.vcf", sample=config["samples"], ftype=ftypes),
+        expand("cnvkit/{sample}/{sample}.regions{ftype}.scatter.png", sample=config["samples"], ftype=ftypes),
+
+
+def get_cram(sample):
+    return f"{config['cram_path']}/{sample}/{sample}.md.cram" 
+
+
+rule picard_wgs_metrics:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        txt = "picard/{sample}.collect_wgs_metrics.txt"
+    log: "picard/{sample}.collect_wgs_metrics.txt.log"
+    singularity: config["containers"]["picard"]
+    params:
+        fasta = config["fasta"]
+    shell:
+        "picard CollectWgsMetrics"
+        " I={input.cram}"
+        " O={output.txt}"
+        " R={params.fasta}"
+        " &> {log}"
+
+
+rule picard_gc_bias:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        txt1 = "picard/{sample}.gc_bias_metrics.txt",
+        txt2 = "picard/{sample}.gc_summary_metrics.txt",
+        pdf = "picard/{sample}.gc_bias_metrics.pdf"
+    log: "picard/{sample}.gc_bias_metrics.txt.log"
+    singularity: config["containers"]["picard"]
+    params:
+        fasta = config["fasta"]
+    shell:
+        "picard CollectGcBiasMetrics"
+        " I={input.cram}"
+        " O={output.txt1}"
+        " CHART={output.pdf}"
+        " S={output.txt2}"
+        " R={params.fasta}"
+        " &> {log}"
+
+rule picard_insert_size_metrics:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        txt = "picard/{sample}.insert_size_metrics.txt",
+        pdf = "picard/{sample}.insert_size_metrics.pdf"
+    log: "picard/{sample}.insert_size_metrics.txt.log"
+    singularity: config["containers"]["picard"]
+    params:
+        fasta = config["fasta"]
+    shell:
+        "picard CollectInsertSizeMetrics"
+        " I={input.cram}"
+        " O={output.txt}"
+        " H={output.pdf}"
+        " M=0.5"
+        " R={params.fasta}"
+        " &> {log}"
+
+
+mosdepth_ext = [
+    ".mosdepth.summary.txt", 
+    ".regions.bed.gz",
+    ".mosdepth.global.dist.txt",
+    ".mosdepth.region.dist.txt"
+]
+
+
+rule mosdepth:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        multiext("mosdepth/{sample}", *mosdepth_ext)
+    singularity: config["containers"]["mosdepth"]
+    log: "mosdepth/{sample}.mosdepth.log"
+    params:
+        prefix = "mosdepth/{sample}",
+        ref = config["fasta"],
+    shell:
+        "MOSDEPTH_PRECISION=5"
+        " mosdepth"
+        " --no-per-base"
+        " --fast-mode"
+        " --fasta {params.ref}"
+        " -b 1000" # Bins of 1000 bp
+        " --mapq 20" # Minimum mapping quality of 20
+        " {params.prefix}"
+        " {input.cram}"
+        " &> {log}"
+
+
+rule mosdepth_100kb:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        "mosdepth_100kb/{sample}.regions.bed.gz",
+        temp(multiext("mosdepth_100kb/{sample}", *[ext for ext in mosdepth_ext if ext != ".regions.bed.gz"]))
+    singularity: config["containers"]["mosdepth"]
+    log: "mosdepth_100kb/{sample}.mosdepth.log"
+    params:
+        prefix = "mosdepth_100kb/{sample}",
+        ref = config["fasta"],
+    shell:
+        "MOSDEPTH_PRECISION=5"
+        " mosdepth"
+        " --no-per-base"
+        " --fast-mode"
+        " --fasta {params.ref}"
+        " -b 100000" # Bins of 100 kbp
+        " --mapq 20" # Minimum mapping quality of 20
+        " {params.prefix}"
+        " {input.cram}"
+        " &> {log}"
+
+
+rule bed_to_bedgraph:
+    input:
+        bed = "mosdepth_100kb/{sample}.regions.bed.gz",
+    output:
+        bedgrapgh = "mosdepth_100kb/bedgraph/{sample}.regions.bedgraph"
+    shell:
+        "zcat {input.bed}"
+        " | awk '{{OFS=\"\\t\"; print $1,$2,$3,$4}}'"
+        " > {output.bedgrapgh}"
+
+
+rule samtools_idxstats:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        txt = "idxstats/{sample}.idxstats.txt"
+    log: "idxstats/{sample}.idxstats.txt.log"
+    singularity: config["containers"]["samtools"]
+    shell:
+        "samtools idxstats"
+        " {input.cram}"
+        " > {output.txt}"
+
+
+rule cram_to_bam:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        bam = "bam/{sample}.bam"
+    log: "bam/{sample}.bam.log"
+    singularity: config["containers"]["samtools"]
+    threads: 2
+    params:
+        ref = config["fasta"]
+    shell:
+        "samtools view"
+        " -@ {threads}"
+        " -f 2" # Only properly paired reads
+        " -bh"
+        " -T {params.ref}"
+        " {input.cram}"
+        " -o {output.bam}"
+        " &> {log}"
+
+
+rule bam_to_bed:
+    input:
+        bam = "bam/{sample}.bam"
+    output:
+        bed = "bam/{sample}.bed"
+    log: "bam/{sample}.bed.log"
+    params: 
+        bedtools = f'singularity exec {config["containers"]["bedtools"]}',
+        samtools = f'singularity exec {config["containers"]["samtools"]}',
+    shell:
+        "{params.samtools}"
+        " view"
+        " -f 1026" # Only properly paired non-duplicate reads
+        " -bh"
+        " {input.bam}"
+        " | "
+        "{params.bedtools}"
+        "bamToBed"
+        " -i stdin"
+        " > {output.bed}"
+        " 2> {log}"
+
+
+rule preseq_gc_extrap:
+    # docs: https://preseq.readthedocs.io/en/latest/
+    input:
+        bed = "bam/{sample}.bed",
+    output:
+        txt = touch("preseq/{sample}.gc_extrap.txt")
+    log: "preseq/{sample}.gc_extrap.txt.log"
+    singularity: config["containers"]["preseq"]
+    shell:
+        "preseq gc_extrap"
+        " -o {output.txt}"
+        " -b 1" # 10 bp bins, default
+        " -bed"
+        " -v"
+        " -e 10000000000" # Extrapolate to 10B reads
+        " -D" # Defects mode
+        " {input.bed}"
+        " &> {log}"
+
+
+rule preseq_lc_extrap:
+    input:
+        bam = "bam/{sample}.bam"
+    output:
+        txt = "preseq/{sample}.lc_extrap.txt"
+    log: "preseq/{sample}.lc_extrap.txt.log"
+    singularity: config["containers"]["preseq"]
+    shell:
+        "preseq lc_extrap"
+        " -o {output.txt}"
+        " -bam"
+        " -e 1000000000" # Extrapolate to 1B reads
+        " {input.bam}"
+        " &> {log}"
+
+
+rule multiqc_sample_names:
+    input:
+        tsv = "../../../sample_info.tsv"
+    output:
+        tsv = "multiqc_sample_names.tsv"
+    shell:
+        "cut -f -2 {input.tsv}"
+        " > {output.tsv}"
+
+
+rule multiqc:
+    input:
+        expand("picard/{sample}.collect_wgs_metrics.txt", sample=config["samples"]),
+        expand("picard/{sample}.gc_bias_metrics.txt", sample=config["samples"]),
+        expand("picard/{sample}.insert_size_metrics.txt", sample=config["samples"]),
+        expand("mosdepth/{sample}.mosdepth.summary.txt", sample=config["samples"]),
+        expand("idxstats/{sample}.idxstats.txt", sample=config["samples"]),
+        expand("preseq/{sample}.gc_extrap.txt", sample=config["samples"]),
+        expand("preseq/{sample}.lc_extrap.txt", sample=config["samples"]),
+        tsv = "multiqc_sample_names.tsv",
+    output:
+        data = directory("multiqc_data"),
+        html = "multiqc_report.html"
+    log: "multiqc_report.html.log" 
+    singularity: config["containers"]["multiqc"]
+    shell:
+        "multiqc"
+        " -m picard"
+        " -m mosdepth"
+        " -m samtools"
+        " -m preseq"
+        " --sample-names {input.tsv}"
+        " ."
+        " -v"
+        " &> {log}"
+
+
+# **************************
+# *** CNVkit CNV calling ***
+# **************************
+
+# OBS! This worked but is super slow
+#
+# rule cnvkit_batch:
+#     input:
+#         cram = lambda wc: get_cram(wc.sample)
+#     output:
+#         dir = directory("cnvkit/{sample}")
+#     singularity: config["containers"]["cnvkit"]
+#     log: "cnvkit/{sample}.log"
+#     params:
+#         fasta = lambda wildcards: fasta,
+#         genes = lambda wildcards: genes_flat
+#     shell:
+#         "cnvkit.py batch"
+#         " {input.cram}"
+#         " -n" # Use flat reference
+#         " -m wgs"
+#         " -f {params.fasta}"
+#         #" --annotate <(gunzip -c {params.genes})"
+#         " -d {output.dir}"
+#         " --scatter"
+#         " --diagram"
+#         " &> {log}"
+
+
+rule cnvkit_access:
+    output:
+        bed = "cnvkit/access_GRCh38.bed"
+    log: "cnvkit/access_GRCh38.log"
+    singularity: config["containers"]["cnvkit"]
+    params:
+        fasta = config["fasta"],
+        excluded = config["excluded_regions"],
+    shell:
+        "cnvkit.py access"
+        " {params.fasta}"
+        " -x <(gunzip -c {params.excluded})"
+        " -o {output.bed}"
+        " -s 10000" # Merge regions within 10 kbp
+        " &> {log}"
+
+
+rule cnvkit_autobin:
+    input:
+        crams = [get_cram(sample) for sample in config["samples"]],
+        bed = "cnvkit/access_GRCh38.bed"
+    output:
+        target_bed = "cnvkit/target_GRCh38.bed",
+        antitarget_bed = "cnvkit/antitarget_GRCh38.bed"
+    log: "cnvkit/autobin_GRCh38.log"
+    singularity: config["containers"]["cnvkit"]
+    params:
+        fasta = config["fasta"],
+    shell:
+        "cnvkit.py autobin"
+        " {input.crams}"
+        " -f {params.fasta}"
+        " -m wgs"
+        " -g {input.bed}"
+        # Increase target size max 20kb -> 1Mbp and min 20bp -> 10kbp
+        " --target-max-size 1_000_000"
+        " --target-min-size 10_000"
+        " --bp-per-bin 50000" # Default is 10000, 5000 used in batch.py https://github.com/etal/cnvkit/blob/5cb6aeaf40ea5572063cf9914c456c307b7ddf7a/cnvlib/batch.py#L107C58-L107C65
+        " --target-output-bed {output.target_bed}"
+        " --antitarget-output-bed {output.antitarget_bed}"
+        " &> {log}"
+
+
+rule target_coverage:
+    input:
+        bed = "cnvkit/target_GRCh38.bed",
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        bed = "cnvkit/{sample}/{sample}.regions.bed.gz" 
+    singularity: config["containers"]["mosdepth"]
+    params:
+        ref = config["fasta"],
+        prefix = lambda wildcards: f"cnvkit/{wildcards.sample}/{wildcards.sample}"
+    threads: 4
+    shell:
+        "MOSDEPTH_PRECISION=5"
+        " mosdepth"
+        " --no-per-base"
+        " --fast-mode"
+        " --fasta {params.ref}"
+        " -t {threads}"
+        " -b {input.bed}"
+        " --mapq 20"
+        " {params.prefix}"
+        " {input.cram}"
+        " &> {params.prefix}.mosdepth.log"
+
+
+rule bed_to_cnn:
+    input:
+        bed = "cnvkit/{sample}/{sample}.regions.bed.gz"
+    output:
+        cnn = "cnvkit/{sample}/{sample}.regions.cnn"
+    params:
+        header = "chromosome\tstart\tend\tgene\tdepth\tlog2"
+    shell:
+        "echo '{params.header}' > {output.cnn}"
+        " && "
+        "zcat {input.bed}"
+        " | "
+        "awk '{{OFS=\"\\t\"; print $1,$2,$3,\"-\",$5,log($5)/log(2)}}'"
+        " | "
+        # Replace -inf with -20.0 similar to cnvkit.py coverage command
+        # see: https://github.com/etal/cnvkit/blob/5cb6aeaf40ea5572063cf9914c456c307b7ddf7a/cnvlib/coverage.py#L167
+        "sed 's|-inf|-20.0|g'"
+        " >> {output.cnn}"
+
+
+rule antitarget_cnn:
+    output:
+        cnn = "cnvkit/antitarget.cnn"
+    params:
+        header = "chromosome\tstart\tend\tgene\tdepth\tlog2"
+    shell:
+        "echo '{params.header}' > {output.cnn}"
+
+
+rule cnvkit_reference:
+    # Create flat reference
+    # https://cnvkit.readthedocs.io/en/stable/pipeline.html#with-no-control-samples
+    input:
+        target_bed = "cnvkit/target_GRCh38.bed",
+        antitarget_bed = "cnvkit/antitarget_GRCh38.bed",
+    output:
+        reference = "cnvkit/reference_GRCh38.cnn"
+    log: "cnvkit/reference_GRCh38.log"
+    singularity: config["containers"]["cnvkit"]
+    params:
+        fasta = config["fasta"]
+    shell:
+        "cnvkit.py reference"
+        " -f {params.fasta}"
+        " -o {output.reference}"
+        " -t {input.target_bed}"
+        " -a {input.antitarget_bed}"
+        " --no-edge"
+        " &> {log}"
+
+
+rule cnvkit_fix:
+    input:
+        reference_cnn = "cnvkit/reference_GRCh38.cnn",
+        target_cnn = "cnvkit/{sample}/{sample}.regions.cnn",
+        antitarget_cnn = "cnvkit/antitarget.cnn"
+    output:
+        cnr = "cnvkit/{sample}/{sample}.regions.cnr",
+    log: "cnvkit/{sample}/{sample}.regions.cnr.log"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py fix"
+        " {input.target_cnn}"
+        " {input.antitarget_cnn}"
+        " {input.reference_cnn}"
+        " -o {output.cnr}"
+        " --no-edge"
+        " &> {log}"
+
+
+rule cnr_to_bedgraph:
+    input:
+        cnr = "cnvkit/{sample}/{sample}.regions.cnr"
+    output:
+        bedgraph = "cnvkit/{sample}/{sample}.regions.log2.bedgraph"
+    shell:
+        "tail -n +2 {input.cnr}"
+        " | "
+        "cut -f 1,2,3,5"
+        " > {output.bedgraph}"
+
+
+rule cnvkit_segment:
+    input:
+        cnr = "cnvkit/{sample}/{sample}.regions.cnr",
+    output:
+        cns = "cnvkit/{sample}/{sample}.regions.cns",
+    log: "cnvkit/{sample}/{sample}.regions.cns.log"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py segment"
+        " {input.cnr}"
+        " -m hmm-germline"
+        " -t 1e-6"
+        " -o {output.cns}"
+        " &> {log}"
+
+
+rule cnvkit_segmetrics_ci:
+    # https://github.com/etal/cnvkit/blob/5cb6aeaf40ea5572063cf9914c456c307b7ddf7a/cnvlib/batch.py#L279C1-L288C50
+    input:
+        cns = "cnvkit/{sample}/{sample}.regions.cns",
+        cnr = "cnvkit/{sample}/{sample}.regions.cnr"
+    output:
+        cns = "cnvkit/{sample}/{sample}.regions.segmetrics_ci.cns"
+    log: "cnvkit/{sample}/{sample}.regions.segmetrics_ci.cns.log"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py segmetrics"
+        " {input.cnr}"
+        " -s {input.cns}"
+        " -o {output.cns}"
+        " --ci"
+        " --alpha 0.01" # Default is 0.05 
+        # TODO test " --smooth-bootstrap"
+        " &> {log}"
+
+
+rule cnvkit_remove_fp:
+    # https://github.com/etal/cnvkit/blob/5cb6aeaf40ea5572063cf9914c456c307b7ddf7a/cnvlib/batch.py#L290-L291
+    input:
+        cns = "cnvkit/{sample}/{sample}.regions.segmetrics_ci.cns"
+    output:
+        cns = "cnvkit/{sample}/{sample}.regions.filtered.cns",
+    log: "cnvkit/{sample}/{sample}.regions.filtered.cns.log"
+    singularity: config["containers"]["cnvkit"]
+    params:
+        sex = "f"
+    shell:
+        "cnvkit.py call"
+        " {input.cns}"
+        " --filter ci"
+        " -m none"
+        " -x {params.sex}"
+        " -o {output.cns}"
+        " &> {log}"
+
+
+rule cnvkit_segmetrics_ttest:
+    input:
+        cns = "cnvkit/{sample}/{sample}.regions.filtered.cns",
+        cnr = "cnvkit/{sample}/{sample}.regions.cnr"
+    output:
+        cns = "cnvkit/{sample}/{sample}.regions.segmetrics_ttest.cns"
+    log: "cnvkit/{sample}/{sample}.regions.segmetrics_ttest.cns.log"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py segmetrics"
+        " {input.cnr}"
+        " -s {input.cns}"
+        " -o {output.cns}"
+        " --t-test"
+        " &> {log}"
+
+
+rule cnvkit_call:
+    input:
+        cns = "cnvkit/{sample}/{sample}.regions.segmetrics_ttest.cns",
+    output:
+        call = "cnvkit/{sample}/{sample}.regions.call.cns",
+    log: "cnvkit/{sample}/{sample}.regions.call.cns.log"
+    singularity: config["containers"]["cnvkit"]
+    params:
+        sex = "f"
+    shell:
+        "cnvkit.py call"
+        " {input.cns}"
+        " -m threshold" # TODO - test clonal
+        " -o {output.call}"
+        " -x {params.sex}"
+        " --purity 1.0"
+        " &> {log}"
+
+
+rule cnvkit_call_cnv:
+    input:
+        cns = "cnvkit/{sample}/{sample}.regions.segmetrics_ttest.cns",
+    output:
+        call = "cnvkit/{sample}/{sample}.regions.cnv.cns",
+    log: "cnvkit/{sample}/{sample}.regions.cnv.cns.log"
+    singularity: config["containers"]["cnvkit"]
+    params:
+        sex = "f"
+    shell:
+        "cnvkit.py call"
+        " {input.cns}"
+        " -m clonal"
+        " -o {output.call}"
+        " -x {params.sex}"
+        " --ploidy 2"
+        " --purity 1.0"
+        " &> {log}"
+
+
+rule cnvkit_bintest:
+    input:
+        cnr = "cnvkit/{sample}/{sample}.regions.cnr",
+        cns = "cnvkit/{sample}/{sample}.regions.filtered.cns"
+    output:
+        cns = "cnvkit/{sample}/{sample}.regions.filtered.bintest.cns"
+    log: "cnvkit/{sample}/{sample}.regions.filtered.bintest.cns.log"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py bintest"
+        " {input.cnr}"
+        " --target" # Only test target bins
+        " -s {input.cns}"
+        " -o {output.cns}"
+        " &> {log}"
+
+
+rule matplotlib_params:
+    output:
+        rc = ".matplotlibrc"
+    params:
+        configs = """\
+figure.figsize: 10, 4.8
+"""
+    shell:
+        "echo '{params.configs}' > {output.rc}"
+        
+
+rule cnvkit_heatmap:
+    input:
+        cns = expand("cnvkit/{sample}/{sample}.regions{{ftype}}.cns", sample=config["samples"]),
+        rc = ".matplotlibrc"
+    output:
+        png = "cnvkit/heatmap_GRCh38{ftype}_mqc.png"
+    log: "cnvkit/heatmap_GRCh38{ftype}_mqc.png.log"
+    singularity: config["containers"]["cnvkit"]
+    params:
+        sex = "f"
+    shell:
+        "cnvkit.py heatmap"
+        " {input.cns}"
+        " -d"
+        " -x {params.sex}"
+        " -o {output.png}"
+        " &> {log}"
+
+
+rule cnvkit_heatmap_sample:
+    input:
+        cns = expand("cnvkit/{{sample}}/{{sample}}.regions{ftype}.cns", ftype=ftypes),
+        rc = ".matplotlibrc"
+    output:
+        png = "cnvkit/{sample}/{sample}_heatmap_mqc.png"
+    log: "cnvkit/{sample}/{sample}_heatmap_mqc.png.log"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py heatmap"
+        " {input.cns}"
+        " -d"
+        " -o {output.png}"
+        " &> {log}"
+
+
+rule cnvkit_scatter_sample:
+    input:
+        cns = "cnvkit/{sample}/{sample}.regions{ftype}.cns",
+        cnr = "cnvkit/{sample}/{sample}.regions.cnr",
+        rc = ".matplotlibrc"
+    output:
+        png = "cnvkit/{sample}/{sample}.regions{ftype}.scatter.png"
+    log: "cnvkit/{sample}/{sample}.regions{ftype}.scatter.png.log"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py scatter"
+        " {input.cnr}"
+        " -s {input.cns}"
+        " -o {output.png}"
+        " --y-min -5"
+        " &> {log}"
+
+
+rule cnvkit_metrics:
+    input: 
+        cnr = expand("cnvkit/{sample}/{sample}.regions.cnr", sample=config["samples"]),
+    output:
+        txt = "cnvkit/metrics.tsv"
+    log: "cnvkit/metrics.tsv.log"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py metrics"
+        " {input.cnr}"
+        " -o {output.txt}"
+        " &> {log}"
+
+
+rule cnvkit_export_vcf:
+    input:
+        cns = "cnvkit/{sample}/{sample}.regions{ftype}.cns"
+    output:
+        vcf = "cnvkit/{sample}/{sample}.regions{ftype}.vcf"
+    singularity: config["containers"]["cnvkit"]
+    params:
+        sex = "f"
+    shell:
+        "cnvkit.py export vcf"
+        " {input.cns}"
+        " --ploidy 2"
+        " -x {params.sex}"
+        " -o {output.vcf}"
+
+
+rule cnvkit_export_seg:
+    input:
+        cns = expand("cnvkit/{sample}/{sample}.regions{{ftype}}.cns", sample=config["samples"]),
+    output:
+        seg = "cnvkit/GRCh38{ftype,(|.filtered)}.seg"
+    singularity: config["containers"]["cnvkit"]
+    shell:
+        "cnvkit.py export seg"
+        " {input.cns}"
+        " -o {output.seg}"
+        " && "
+        # Remove suffix from sample names
+        "sed -i 's|.regions{wildcards.ftype}||g' {output.seg}"
+
+
+rule export_seg_cnv:
+    # CNVkit export seg cannot report copy number values
+    input:
+        cns = expand("cnvkit/{sample}/{sample}.regions{{ftype}}.cns", sample=config["samples"]),
+    output:
+        seg = "cnvkit/GRCh38{ftype,(.call|.cnv)}.seg"
+    params:
+        header = "ID\tchrom\tstart\tend\tcopy_number"
+    run:
+        with open(output.seg, "w") as f:
+            print(params.header, file=f)
+            for cns in input.cns:
+                sample = cns.split("/")[1]
+                with open(cns) as cnsf:
+                    # Skip header
+                    next(cnsf)
+
+                    for line in cnsf:
+                        # chromosome	start	end	gene	log2	cn	depth	p_ttest	probes	weight
+                        chromosome, start, end, gene, log2, cn, depth, p_ttest, probes, weight = line.strip().split("\t")
+                        print(
+                            sample,
+                            chromosome,
+                            start,
+                            end,
+                            cn,
+                            sep="\t",
+                            file=f
+                        )
+

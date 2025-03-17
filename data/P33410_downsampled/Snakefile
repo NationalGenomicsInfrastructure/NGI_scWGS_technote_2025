@@ -1,0 +1,92 @@
+"""
+Snakemake file for downsampling FASTQs
+
+load modules:
+
+    ml bioinfo-tools snakemake
+
+sbatch command:
+    
+    sbatch -A ngi2016004 -J downsample -n 16 -p core -t 1-00:00:00 --wrap "snakemake -p -j 16 --use-singularity -k --rerun-incomplete" --mail-user phojer@kth.se --mail-type ALL
+"""
+
+from pathlib import Path
+
+datadir = Path("/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/data/P33410")
+sample_info_tsv = datadir / "00-Reports/G.Applications_24_11_sample_info.txt"
+
+reads = ["R1", "R2"]
+downsample_million = [2, 40, 100]
+
+# Containers
+SEQTK_CONTAINER = "/vulpes/proj/ngis/ngi2016004/private/pontus/tools/seqtk_1.4_he4a0461_2.depot.galaxyproject.img"
+
+def get_sample_reads(tsv):
+    """
+    Get the number of reads for each sample from the sample info TSV file.
+
+    Format of the TSV file:
+    ---
+    NGI ID	User ID	RC	Mreads	>=Q30
+    P33410_1001	Q_B2_cell_01	NA	237.72	92.90
+    ...
+    ---
+    """
+    sample_reads = {}
+    with open(tsv) as f:
+        next(f) # Skip header
+        for line in f:
+            columns = line.strip().split("\t")
+            sample_reads[columns[0]] = float(columns[3])
+    
+    return sample_reads
+
+sample_reads = get_sample_reads(sample_info_tsv) 
+
+def samples_to_downsample(threshold):
+    return [sample for sample, reads in sample_reads.items() if reads > threshold]
+
+
+rule all:
+    input:
+        [
+            expand("{max_reads}M/{sample}.{read}.fastq.gz", max_reads=max_reads, sample=samples_to_downsample(max_reads), read=reads) 
+            for max_reads in downsample_million
+        ]
+
+
+def downsample_fraction(wildcards):
+    sample = wildcards.sample
+    sample_reads_million = sample_reads[sample]
+    return int(wildcards.max_reads) / sample_reads_million
+
+
+def get_fastq_path(wildcards):
+    sample = wildcards.sample
+    read = wildcards.read
+    paths_file = datadir / (sample + ".lst")
+    fastq_path = None
+    with open(paths_file) as f:
+        for line in f:
+            if line.endswith(f".fastq.gz\n") and f"_{read}_" in line:
+                fastq_path = datadir / line.strip()
+                break
+    
+    assert fastq_path is not None, f"Could not find fastq path for {sample} {read}"
+    
+    assert fastq_path.exists(), f"{fastq_path} does not exist"
+    
+    return fastq_path
+
+
+rule downsample:
+    input:
+        fastq = get_fastq_path
+    output:
+        fastq = "{max_reads}M/{sample}.{read}.fastq.gz"
+    singularity: SEQTK_CONTAINER
+    params:
+        frac = lambda wildcards: downsample_fraction(wildcards)
+    threads: 2
+    shell:
+        "seqtk sample -s100 {input.fastq} {params.frac} | gzip -c > {output.fastq}"

@@ -1,0 +1,141 @@
+
+sample_list = [
+    "P33410_1001",
+    "P33410_1002",
+    "P33410_1003",
+    "P33410_1004",
+    "P33410_1005",
+    "P33410_1006",
+    #"P33410_1007",
+    "P33410_1008",
+    "P33410_1009",
+    "P33410_1010",
+    "P33410_1011",
+    "P33410_1012",
+    "P33410_1013",
+    "P33410_1014",
+    "P33410_1015",
+    "P33410_1016",
+    "P33410_1017",
+    "P33410_1018",
+    "P33410_1019",
+    "P33410_1020",
+    "P33410_1021",
+    "P33410_1022",
+    #"P33410_1023",
+    "P33410_1024"
+]
+genome = "../../resources/GRCh38.genome"
+
+truth_sets = ["OGM", "PacBio_HiFi"]
+
+callers = ["copykit", "ginkgo"]
+
+copykit_read_depth = ["2M", "40M", "full"]
+ginkgo_read_depth = ["2M", "40M"]
+
+copykit_binsizes = ["110kb", "220kb", "500kb", "1Mb"] 
+ginkgo_binsizes = ["1Mb"]
+
+types = [
+    "cn", # Copy number
+    "gl"  # Gain/Loss
+]
+
+wildcard_constraints:
+    caller = '|'.join(callers),
+    reads = '|'.join(copykit_read_depth),
+    truth = '|'.join(truth_sets),
+    binsize = '|'.join(copykit_binsizes),
+    type = '|'.join(types),
+    sample = '|'.join(sample_list)
+
+rule all:
+    input:
+        expand(
+            "agreement/ginkgo/{reads}/{truth}/{binsize}.{type}.tsv", 
+            reads=ginkgo_read_depth,
+            truth=truth_sets, 
+            binsize=ginkgo_binsizes, 
+            type=types,
+        ),
+        expand(
+            "agreement/copykit/{reads}/{truth}/{binsize}.{type}.tsv", 
+            reads=copykit_read_depth,
+            truth=truth_sets, 
+            binsize=copykit_binsizes, 
+            type=types,
+        ),
+        expand(
+            "agreement_truthsets.{type}.tsv",
+            type=types,
+        )
+
+
+def get_query_seg(wildcards):
+    if wildcards.caller == "copykit":
+        return f"../copykit/copykit/{wildcards.reads}/{wildcards.binsize}.seg"
+    elif wildcards.caller == "ginkgo":
+        if wildcards.reads == "2M":
+            return "../basejumper/2M/CNV_Ginkgo_data/CNV1_binsize_1000000.seg"
+        elif wildcards.reads == "40M":
+            return "../basejumper/40M/CNV_Ginkgo_tertiary_data/Ginkgo_CNV1.seg"
+        else:
+            raise ValueError("Unknown ginkgo read depth: " + wildcards.reads)
+    raise ValueError("Unknown caller: " + wildcards.caller)
+
+
+def get_truth(name):
+    if name == "OGM":
+        return "../../resources/OGM_CNVs/cnv_calls.chr.seg"
+    elif name == "PacBio_HiFi":
+        return "../../resources/PacBioHiFi_pr_023_003_MM1S_hificnv/MM1S_excluded.pr_023_003.seg"
+    raise ValueError("Unknown truth set: " + name)
+
+
+def get_truth_seg(wildcards):
+    return get_truth(wildcards.truth)
+
+
+rule cnv_benchmark:
+    input:
+        query_seg = get_query_seg,
+        truth_seg = get_truth_seg,
+    output:
+        tsv = "agreement/{caller}/{reads}/{truth}/{binsize}.{type}.tsv"
+    log: "agreement/{caller}/{reads}/{truth}/{binsize}.{type}.tsv.log"
+    params:
+        genome = genome,
+        script = "../../scripts/cnv_agreement.py",
+        gl_mode = lambda wc: "--gl" if "gl" in wc.type else "",
+    shell:
+        "python {params.script}"
+        " {input.query_seg}"
+        " {input.truth_seg}"
+        " --fai {params.genome}"
+        " --ploidy 2"
+        " {params.gl_mode}"
+        " > {output.tsv}"
+        " 2> {log}"
+
+
+rule cnv_benchmark_truth:
+    input:
+        ogm = get_truth("OGM"),
+        pb = get_truth("PacBio_HiFi"),
+    output:
+        tsv = "agreement_truthsets.{type}.tsv"
+    log: "agreement_truthsets.{type}.tsv.log"
+    params:
+        genome = genome,
+        script = "../../scripts/cnv_agreement.py",
+        gl_mode = lambda wc: "--gl" if "gl" in wc.type else "",
+    shell:
+        "python {params.script}"
+        " {input.ogm}"
+        " {input.pb}"
+        " --fai {params.genome}"
+        " --ploidy 2"
+        " {params.gl_mode}"
+        " > {output.tsv}"
+        " 2> {log}"
