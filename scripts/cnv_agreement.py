@@ -159,6 +159,24 @@ def process_truth(truth_seg, chr_lengths, ploidy=2, gain_loss=False):
     return truth_cnvs
 
 
+def parse_bed(bed_file):
+    """
+    Parse a BED file and return a list of tuples (chrom, start, end).
+    """
+    regions_by_chrom = defaultdict(list)
+    with open(bed_file) as f:
+        for line in f:
+            if line.startswith("#"):
+                continue
+            fields = line.strip().split()
+            chrom = fields[0]
+            start = int(fields[1])
+            end = int(fields[2])
+            regions_by_chrom[chrom].append((start, end))
+            
+    return regions_by_chrom
+
+
 def main(args):
     logger.info("Running cnv_agreement.py")
     for k,v in vars(args).items():
@@ -167,7 +185,12 @@ def main(args):
 
     logger.info("Reading reference genome lengths...")
     chr_lengths = {chrom: length for chrom, length in parse_fai(args.fai)}
-    
+
+    excluded_regions = {}
+    if args.exclude:
+        logger.info("Reading regions to exclude...")
+        excluded_regions = parse_bed(args.exclude)
+
     truth_cnvs = process_truth(args.truth, chr_lengths, args.ploidy, args.gl)
 
     all_querys = get_cnvs(args.query, args.ploidy)
@@ -225,5 +248,6 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--fai", help="Reference fasta index file", required=True)
     parser.add_argument("-p", "--ploidy", help="Ploidy. Default: %(default)s", type=int, default=2)
     parser.add_argument("--gl", "--gain-loss", help="Only consider gains and losses", action="store_true")
+    parser.add_argument("-e", "--exclude", help="BED with regions to exclude from analysis", nargs="+", default=[])
     args = parser.parse_args()
     main(args)

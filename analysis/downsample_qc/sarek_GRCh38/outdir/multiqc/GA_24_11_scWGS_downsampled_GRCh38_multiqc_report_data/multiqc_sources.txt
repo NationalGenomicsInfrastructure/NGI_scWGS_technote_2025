@@ -1,0 +1,133 @@
+Module	Section	Sample Name	Source
+FastQC (raw)	all_sections	P33410_1020-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/5/P33410_1020-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1010-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/13/P33410_1010-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1005-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/11/P33410_1005-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1020-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/6/P33410_1020-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1013-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/45/P33410_1013-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1011-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/7/P33410_1011-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1011-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/8/P33410_1011-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1012-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/29/P33410_1012-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1019-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/27/P33410_1019-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1015-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/15/P33410_1015-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1001-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/39/P33410_1001-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1013-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/46/P33410_1013-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1005-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/12/P33410_1005-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1002-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/20/P33410_1002-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1014-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/31/P33410_1014-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1006-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/26/P33410_1006-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1009-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/24/P33410_1009-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1016-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/36/P33410_1016-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1001-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/40/P33410_1001-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1010-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/14/P33410_1010-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1024-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/18/P33410_1024-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1002-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/19/P33410_1002-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1024-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/17/P33410_1024-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1018-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/10/P33410_1018-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1004-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/37/P33410_1004-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1003-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/43/P33410_1003-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1017-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/22/P33410_1017-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1018-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/9/P33410_1018-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1022-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/42/P33410_1022-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1008-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/3/P33410_1008-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1016-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/35/P33410_1016-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1021-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/33/P33410_1021-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1012-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/30/P33410_1012-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1021-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/34/P33410_1021-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1006-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/25/P33410_1006-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1009-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/23/P33410_1009-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1003-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/44/P33410_1003-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1017-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/21/P33410_1017-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1004-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/38/P33410_1004-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1015-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/16/P33410_1015-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1008-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/4/P33410_1008-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1014-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/32/P33410_1014-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1022-L003_1	/scratch/8669649/nxf.7ZIAXjYKzF/41/P33410_1022-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1019-L003_2	/scratch/8669649/nxf.7ZIAXjYKzF/28/P33410_1019-L003_2_fastqc.zip
+FastP (Read preprocessing)	all_sections	P33410_1015-L003	/scratch/8669649/nxf.7ZIAXjYKzF/84/P33410_1015-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1024-L003	/scratch/8669649/nxf.7ZIAXjYKzF/83/P33410_1024-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1012-L003	/scratch/8669649/nxf.7ZIAXjYKzF/69/P33410_1012-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1021-L003	/scratch/8669649/nxf.7ZIAXjYKzF/78/P33410_1021-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1009-L003	/scratch/8669649/nxf.7ZIAXjYKzF/75/P33410_1009-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1019-L003	/scratch/8669649/nxf.7ZIAXjYKzF/77/P33410_1019-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1014-L003	/scratch/8669649/nxf.7ZIAXjYKzF/90/P33410_1014-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1002-L003	/scratch/8669649/nxf.7ZIAXjYKzF/73/P33410_1002-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1017-L003	/scratch/8669649/nxf.7ZIAXjYKzF/85/P33410_1017-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1011-L003	/scratch/8669649/nxf.7ZIAXjYKzF/80/P33410_1011-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1010-L003	/scratch/8669649/nxf.7ZIAXjYKzF/70/P33410_1010-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1016-L003	/scratch/8669649/nxf.7ZIAXjYKzF/87/P33410_1016-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1004-L003	/scratch/8669649/nxf.7ZIAXjYKzF/81/P33410_1004-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1020-L003	/scratch/8669649/nxf.7ZIAXjYKzF/72/P33410_1020-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1022-L003	/scratch/8669649/nxf.7ZIAXjYKzF/89/P33410_1022-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1001-L003	/scratch/8669649/nxf.7ZIAXjYKzF/76/P33410_1001-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1013-L003	/scratch/8669649/nxf.7ZIAXjYKzF/86/P33410_1013-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1018-L003	/scratch/8669649/nxf.7ZIAXjYKzF/82/P33410_1018-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1006-L003	/scratch/8669649/nxf.7ZIAXjYKzF/74/P33410_1006-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1003-L003	/scratch/8669649/nxf.7ZIAXjYKzF/79/P33410_1003-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1005-L003	/scratch/8669649/nxf.7ZIAXjYKzF/71/P33410_1005-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1008-L003	/scratch/8669649/nxf.7ZIAXjYKzF/88/P33410_1008-L003.fastp.json
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1006-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/151/P33410_1006.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1022-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/93/P33410_1022.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1004-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/95/P33410_1004.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1003-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/157/P33410_1003.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1020-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/140/P33410_1020.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1015-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/97/P33410_1015.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1009-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/155/P33410_1009.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1021-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/91/P33410_1021.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1010-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/132/P33410_1010.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1008-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/94/P33410_1008.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1014-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/100/P33410_1014.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1017-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/99/P33410_1017.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1002-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/141/P33410_1002.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1011-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/158/P33410_1011.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1013-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/161/P33410_1013.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1005-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/139/P33410_1005.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1024-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/96/P33410_1024.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1001-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/156/P33410_1001.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1016-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/98/P33410_1016.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1018-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/172/P33410_1018.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1019-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/92/P33410_1019.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1012-L003.md	/scratch/8669649/nxf.7ZIAXjYKzF/131/P33410_1012.md.cram.metrics
+Samtools Flagstat	stats	P33410_1018.md	/scratch/8669649/nxf.7ZIAXjYKzF/176/P33410_1018.md.cram.stats
+Samtools Flagstat	stats	P33410_1019.md	/scratch/8669649/nxf.7ZIAXjYKzF/102/P33410_1019.md.cram.stats
+Samtools Flagstat	stats	P33410_1010.md	/scratch/8669649/nxf.7ZIAXjYKzF/136/P33410_1010.md.cram.stats
+Samtools Flagstat	stats	P33410_1011.md	/scratch/8669649/nxf.7ZIAXjYKzF/167/P33410_1011.md.cram.stats
+Samtools Flagstat	stats	P33410_1012.md	/scratch/8669649/nxf.7ZIAXjYKzF/133/P33410_1012.md.cram.stats
+Samtools Flagstat	stats	P33410_1005.md	/scratch/8669649/nxf.7ZIAXjYKzF/142/P33410_1005.md.cram.stats
+Samtools Flagstat	stats	P33410_1022.md	/scratch/8669649/nxf.7ZIAXjYKzF/103/P33410_1022.md.cram.stats
+Samtools Flagstat	stats	P33410_1001.md	/scratch/8669649/nxf.7ZIAXjYKzF/160/P33410_1001.md.cram.stats
+Samtools Flagstat	stats	P33410_1013.md	/scratch/8669649/nxf.7ZIAXjYKzF/173/P33410_1013.md.cram.stats
+Samtools Flagstat	stats	P33410_1004.md	/scratch/8669649/nxf.7ZIAXjYKzF/104/P33410_1004.md.cram.stats
+Samtools Flagstat	stats	P33410_1008.md	/scratch/8669649/nxf.7ZIAXjYKzF/105/P33410_1008.md.cram.stats
+Samtools Flagstat	stats	P33410_1015.md	/scratch/8669649/nxf.7ZIAXjYKzF/107/P33410_1015.md.cram.stats
+Samtools Flagstat	stats	P33410_1021.md	/scratch/8669649/nxf.7ZIAXjYKzF/101/P33410_1021.md.cram.stats
+Samtools Flagstat	stats	P33410_1014.md	/scratch/8669649/nxf.7ZIAXjYKzF/110/P33410_1014.md.cram.stats
+Samtools Flagstat	stats	P33410_1009.md	/scratch/8669649/nxf.7ZIAXjYKzF/159/P33410_1009.md.cram.stats
+Samtools Flagstat	stats	P33410_1002.md	/scratch/8669649/nxf.7ZIAXjYKzF/148/P33410_1002.md.cram.stats
+Samtools Flagstat	stats	P33410_1020.md	/scratch/8669649/nxf.7ZIAXjYKzF/143/P33410_1020.md.cram.stats
+Samtools Flagstat	stats	P33410_1017.md	/scratch/8669649/nxf.7ZIAXjYKzF/109/P33410_1017.md.cram.stats
+Samtools Flagstat	stats	P33410_1016.md	/scratch/8669649/nxf.7ZIAXjYKzF/108/P33410_1016.md.cram.stats
+Samtools Flagstat	stats	P33410_1003.md	/scratch/8669649/nxf.7ZIAXjYKzF/166/P33410_1003.md.cram.stats
+Samtools Flagstat	stats	P33410_1006.md	/scratch/8669649/nxf.7ZIAXjYKzF/152/P33410_1006.md.cram.stats
+Samtools Flagstat	stats	P33410_1024.md	/scratch/8669649/nxf.7ZIAXjYKzF/106/P33410_1024.md.cram.stats
+Mosdepth	genome_results	P33410_1003.md	/scratch/8669649/nxf.7ZIAXjYKzF/170/P33410_1003.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1002.md	/scratch/8669649/nxf.7ZIAXjYKzF/149/P33410_1002.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1019.md	/scratch/8669649/nxf.7ZIAXjYKzF/113/P33410_1019.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1011.md	/scratch/8669649/nxf.7ZIAXjYKzF/168/P33410_1011.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1024.md	/scratch/8669649/nxf.7ZIAXjYKzF/121/P33410_1024.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1015.md	/scratch/8669649/nxf.7ZIAXjYKzF/123/P33410_1015.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1014.md	/scratch/8669649/nxf.7ZIAXjYKzF/129/P33410_1014.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1010.md	/scratch/8669649/nxf.7ZIAXjYKzF/137/P33410_1010.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1005.md	/scratch/8669649/nxf.7ZIAXjYKzF/145/P33410_1005.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1013.md	/scratch/8669649/nxf.7ZIAXjYKzF/174/P33410_1013.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1016.md	/scratch/8669649/nxf.7ZIAXjYKzF/126/P33410_1016.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1021.md	/scratch/8669649/nxf.7ZIAXjYKzF/111/P33410_1021.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1012.md	/scratch/8669649/nxf.7ZIAXjYKzF/134/P33410_1012.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1018.md	/scratch/8669649/nxf.7ZIAXjYKzF/177/P33410_1018.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1017.md	/scratch/8669649/nxf.7ZIAXjYKzF/128/P33410_1017.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1006.md	/scratch/8669649/nxf.7ZIAXjYKzF/153/P33410_1006.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1020.md	/scratch/8669649/nxf.7ZIAXjYKzF/146/P33410_1020.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1001.md	/scratch/8669649/nxf.7ZIAXjYKzF/164/P33410_1001.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1022.md	/scratch/8669649/nxf.7ZIAXjYKzF/115/P33410_1022.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1009.md	/scratch/8669649/nxf.7ZIAXjYKzF/162/P33410_1009.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1008.md	/scratch/8669649/nxf.7ZIAXjYKzF/117/P33410_1008.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1004.md	/scratch/8669649/nxf.7ZIAXjYKzF/119/P33410_1004.md.mosdepth.region.dist.txt

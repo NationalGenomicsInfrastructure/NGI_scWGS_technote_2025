@@ -58,7 +58,7 @@ rule all:
 def downsample_fraction(wildcards):
     sample = wildcards.sample
     sample_reads_million = sample_reads[sample]
-    return int(wildcards.max_reads) / sample_reads_million
+    return float(wildcards.max_reads) / sample_reads_million
 
 
 def get_fastq_path(wildcards):

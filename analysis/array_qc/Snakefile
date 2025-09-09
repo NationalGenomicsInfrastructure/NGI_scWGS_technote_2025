@@ -1,0 +1,377 @@
+"""
+Snakemake file for downstream analysis of 2M downsampled samples.
+
+load modules:
+
+    ml bioinfo-tools snakemake
+
+sbatch command:
+    
+    sbatch -A ngi2016004 -J array_qc -n 12 -p core -t 1-00:00:00 --wrap "snakemake -p -j 12 --use-singularity -k --rerun-incomplete" --mail-user phojer@kth.se --mail-type ALL
+"""
+from snakemake.utils import min_version
+from pathlib import Path
+import csv
+
+min_version("6.0")
+
+configfile: "workflow_config.yaml"
+
+basedir = Path("../../data/ArrayGenotyping_snpseq01253")
+datadir = basedir / "files" / "XK-4162_250519_ResultReport"
+samplesheet = datadir / "XK-4162_250519_IDAT" / "XK-4162_250519_Samplesheet.csv"
+
+def get_samples(samplesheet):
+    with samplesheet.open() as f:
+        collect = False
+        for line in f:
+            if line.startswith("[Data]"):
+                break
+        
+        samples = list(csv.DictReader(f))
+
+        # Filter out control samples
+        samples = [s for s in samples if not s["Sample_ID"].startswith("CEP")] 
+        
+        # Extract samples names and insert
+        samples = [dict(**s, name=s["Sample_ID"].split(".")[0][8:]) for s in samples]
+    
+    return samples
+
+samples = get_samples(samplesheet)
+
+include: "penncnv.smk"
+
+
+rule all:
+    input:
+        "dragena_genotype_call",
+        "dragena_genotype_bedgraph",
+        "dragena_genotype_vcf",
+        "dragena_cyto_call",
+        "samples.rename.vcf.gz",
+        "samples.rename.vcf.gz.tbi",
+        "samples.rename.gt.tsv.gz",
+        "samples.cnv.rename.vcf.gz",
+        "samples.cnv.rename.vcf.gz.tbi",
+        expand("bedgraph/{sample}.{type}.bedgraph", type=["LRR","BAF"], sample=[s["name"] for s in samples]),
+        expand("bedgraph_100kb/{sample}.LRR.bedgraph", sample=[s["name"] for s in samples]),
+        expand("bedgraph_100kb_qc/{sample}.LRR.bedgraph", sample=[s["name"] for s in samples]),
+        "penncnv/cnvs.all.seg"
+
+
+rule dragena_genotype_call:
+    input:
+        idat_folder = datadir / "XK-4162_250519_IDAT" / "209123930004",
+        bpm_manfest = basedir / "GSA-24v3-0_A2.bpm",
+        cluster_file = datadir / "GSA-24v3-0_A1_ClusterFile.egt",
+    output:
+        dir = directory("dragena_genotype_call")
+    log: "dragena_genotype_call.log"
+    params:
+        dragena = config["dragena"]
+    threads: 12
+    shell:
+        "{params.dragena} genotype call"
+        " --bpm-manifest {input.bpm_manfest}"
+        " --cluster-file {input.cluster_file}"
+        " --idat-folder {input.idat_folder}"
+        " --output-folder {output.dir}"
+        " --num-threads {threads}"
+        " &> {log}"
+
+
+rule dragena_genotype_bedgraph:
+    input:
+        bpm_manifest = basedir / "GSA-24v3-0_A2.bpm",
+        dir = "dragena_genotype_call",
+    output:
+        dir = directory("dragena_genotype_bedgraph")
+    log: "dragena_genotype_bedgraph.log"
+    params:
+        dragena = config["dragena"]
+    shell:
+        "{params.dragena} genotype gtc-to-bedgraph"
+        " --bpm-manifest {input.bpm_manifest}"
+        " --gtc-folder {input.dir}"
+        " --output-folder {output.dir}"
+        " &> {log}"    
+
+
+rule rename_bedgraphs:
+    input:
+        dir = "dragena_genotype_bedgraph"
+    output:
+        expand(
+            "bedgraph/{sample}.{ftype}.bedgraph", 
+            sample = [s["name"] for s in samples],
+            ftype=["BAF", "LRR"]
+        )
+    run:
+        new_dir = Path("bedgraph")
+        new_dir.mkdir(exist_ok=True)
+        for sample in samples:
+            samples_name = f"{sample['SentrixBarcode_A']}_{sample['SentrixPosition_A']}"
+            new_sample_name = sample["name"]
+            
+            for ftype in ["BAF", "LRR"]:
+                bedg = Path(input.dir) / f"{samples_name}.{ftype}.bedgraph"
+                new_bedg = new_dir / f"{new_sample_name}.{ftype}.bedgraph"
+                
+                track_line = ""
+                if ftype == "BAF":
+                    
+                    track_line = f"track type=bedGraph name=\"{new_sample_name}.BAF\" maxHeightPixels=50:50:50 graphType=points viewLimits=0:1 windowingFunction=none color=200,100,0 altColor=0,100,200"
+                elif ftype == "LRR":
+                    # track type=bedGraph name="209123930004_R12C01.LRR" maxHeightPixels=200:200:200 graphType=points viewLimits=-2:2 windowingFunction=none color=200,100,0 altColor=0,100,200
+                    track_line = f"track type=bedGraph name=\"{new_sample_name}.LRR\" maxHeightPixels=50:50:50 graphType=points viewLimits=-2:2 windowingFunction=none color=200,100,0 altColor=0,100,200"
+                
+                # Add new track line and append bedgraph without old track line
+                shell(f"echo '{track_line}' > {new_bedg} && tail -n+2 {bedg} >> {new_bedg}")
+
+rule sort_bedg:
+    input:
+        genome = "GRCh38.genome",
+        bedg = "bedgraph/{sample}.LRR.bedgraph", 
+    output:
+        bedg = "bedgraph/{sample}.LRR.sort.bedgraph", 
+    singularity: config["containers"]["bedtools"]
+    shell:
+        # Remove chrXY entries
+        "grep -v ^chrXY"
+        " {input.bedg}"
+        " | "
+        # Sort bedgraph
+        "bedtools sort"
+        " -i stdin"
+        " -g {input.genome}"
+        " > {output.bedg}"
+    
+
+rule subsample_llr:
+    input:
+        bedg = "bedgraph/{sample}.LRR.sort.bedgraph", 
+    output:
+        bedg = "bedgraph/{sample}.LRR.qc.bedgraph", 
+    shell:
+        # Sample bedgraph
+        "shuf"
+        " --random-source=<(yes 1)" # Set seed to make repeatable
+        " -n 15949" # Markers in QC array https://emea.illumina.com/products/by-type/microarray-kits/infinium-qc.html
+        " {input.bedg}"
+        " > {output.bedg}"
+
+
+rule add_chr_fai:
+    output:
+        "GRCh38.genome"
+    params:
+        fai = config["fasta"] +  ".fai"
+    shell:
+        "sed 's|^|chr|g' {params.fai} > {output}"
+
+
+rule bedtools_makewindows:
+    input:
+        "GRCh38.genome"
+    output:
+        "100kb.bed"
+    singularity: config["containers"]["bedtools"]
+    shell:
+        "bedtools makewindows"
+        " -g {input}"
+        " -w 100000"
+        " > {output}"
+
+
+rule mean_lrr_per_100kb:
+    input:
+        bed = "100kb.bed",
+        bedg = "bedgraph/{sample}.LRR.sort.bedgraph", 
+    output:
+        bedg = "bedgraph_100kb/{sample}.LRR.bedgraph", 
+    singularity: config["containers"]["bedtools"]
+    shell:
+        "bedtools map"
+        " -a {input.bed}"
+        " -b {input.bedg}" 
+        " -c 4"
+        " -o mean"
+        " > {output.bedg}"
+
+rule mean_lrr_per_100kb_qc:
+    input:
+        genome = "GRCh38.genome",
+        bed = "100kb.bed",
+        bedg = "bedgraph/{sample}.LRR.qc.bedgraph", 
+    output:
+        bedg = "bedgraph_100kb_qc/{sample}.LRR.bedgraph", 
+    singularity: config["containers"]["bedtools"]
+    shell:
+        # Sort bedgraph
+        "bedtools sort"
+        " -i {input.bedg}" 
+        " -g {input.genome}"
+        " | "
+        "bedtools map"
+        " -a {input.bed}"
+        " -b stdin"
+        " -c 4"
+        " -o mean"
+        " > {output.bedg}"
+
+
+rule dragena_genotype_vcf:
+    input:
+        csv_manifest = datadir / "GSA-24v3-0_A2.csv",
+        bpm_mainfest = basedir / "GSA-24v3-0_A2.bpm",
+        gtc_folder = "dragena_genotype_call",
+    output:
+        dir = directory("dragena_genotype_vcf")
+    log: "dragena_genotype_vcf.log"
+    params:
+        dragena = config["dragena"],
+        fasta = config["fasta"],
+    shell:
+        "{params.dragena} genotype gtc-to-vcf"
+        " --bpm-manifest {input.bpm_mainfest}"
+        " --csv-manifest {input.csv_manifest}"
+        " --gtc-folder {input.gtc_folder}"
+        " --genome-fasta-file {params.fasta}"
+        " --output-folder {output.dir}"
+        " &> {log}"    
+
+
+rule vcfs_to_merge:
+    output:
+        txt = "vcfs.txt"
+    run:
+        with open(output.txt, "w") as f:
+            for sample in sorted(samples, key=lambda x: x["name"]):
+                samples_name = f"{sample['SentrixBarcode_A']}_{sample['SentrixPosition_A']}"
+                vcf = Path("dragena_genotype_vcf") / f"{samples_name}.snv.vcf.gz"
+                print(vcf, file=f)
+
+
+rule merge_vcfs:
+    input:
+        txt = "vcfs.txt",
+        dir = "dragena_genotype_vcf"
+    output:
+        vcf = "samples.vcf.gz",
+    singularity: config["containers"]["bcftools"]
+    shell:
+        "bcftools merge"
+        " -o {output.vcf}"
+        " --file-list {input.txt}"
+
+
+rule index_vcf:
+    input:
+        vcf = "{file}.vcf.gz"
+    output:
+        tbi = "{file}.vcf.gz.tbi"
+    singularity: config["containers"]["bcftools"]
+    shell:
+        "tabix -p vcf {input.vcf}"
+
+
+rule sample_table:
+    output:
+        txt = "samples.txt"
+    run:
+        with open(output.txt, "w") as f:
+            for sample in samples:
+                samples_name = f"{sample['SentrixBarcode_A']}_{sample['SentrixPosition_A']}"
+                new_sample_name = sample["name"]
+                print(samples_name, new_sample_name, sep=" ", file=f)
+    
+
+rule rename_vcf:
+    input:
+        vcf = "samples.vcf.gz",
+        txt = "samples.txt",
+    output:
+        vcf = "samples.rename.vcf.gz",
+    singularity: config["containers"]["bcftools"]
+    shell:
+        "bcftools reheader"
+        " -o {output.vcf}"
+        " -s {input.txt}"
+        " {input.vcf}"
+
+rule vcf_to_tsv:
+    input:
+        vcf = "samples.rename.vcf.gz",
+    output:
+        tsv = "samples.rename.gt.tsv.gz"
+    singularity: config["containers"]["bcftools"]
+    shell:
+        "bcftools query"
+        " -H"
+        " -f '%CHROM:%POS\t[%GT\t]\n'"
+        " {input.vcf}"
+        " | "
+        "gzip -c"
+        " > {output.tsv}"
+
+
+rule dragena_cyto_call:
+    # Call CNVs
+    # model from illumina support
+    input:
+        gtc_folder = "dragena_genotype_call",
+        cn_model = "GSA-24v3-0_A2_cyto_model.dat"
+    output:
+        dir = directory("dragena_cyto_call")
+    log: "dragena_cyto_call.log"
+    params:
+        dragena = config["dragena"],
+        fasta = config["fasta"],
+    shell:
+        "{params.dragena} cyto call"
+        " --gtc-folder {input.gtc_folder}"
+        " --cn-model {input.cn_model}"
+        " --output-folder {output.dir}"
+        " &> {log}"
+
+
+rule cnv_vcfs_to_merge:
+    output:
+        txt = "cnv_vcfs.txt"
+    run:
+        with open(output.txt, "w") as f:
+            for sample in sorted(samples, key=lambda x: x["name"]):
+                samples_name = f"{sample['SentrixBarcode_A']}_{sample['SentrixPosition_A']}"
+                vcf = Path("dragena_cyto_call") / f"{samples_name}.cnv.vcf.gz"
+                print(vcf, file=f)
+
+
+rule merge_cnv_vcfs:
+    input:
+        txt = "cnv_vcfs.txt",
+        dir = "dragena_cyto_call"
+    output:
+        vcf = "samples.cnv.vcf.gz",
+    singularity: config["containers"]["bcftools"]
+    shell:
+        "bcftools merge"
+        " --file-list {input.txt}"
+        " | "
+        "bcftools sort"
+        " -o {output.vcf}"
+        " -"
+    
+
+rule rename_cnv_vcf:
+    input:
+        vcf = "samples.cnv.vcf.gz",
+        txt = "samples.txt",
+    output:
+        vcf = "samples.cnv.rename.vcf.gz",
+    singularity: config["containers"]["bcftools"]
+    shell:
+        "bcftools reheader"
+        " -o {output.vcf}"
+        " -s {input.txt}"
+        " {input.vcf}"

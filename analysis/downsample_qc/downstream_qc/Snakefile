@@ -79,11 +79,26 @@ rule all:
         expand("cnvkit/{sample}/{sample}.regions{ftype}.cns", sample=config["samples"], ftype=ftypes),
         expand("cnvkit/{sample}/{sample}.regions{ftype}.vcf", sample=config["samples"], ftype=ftypes),
         expand("cnvkit/{sample}/{sample}.regions{ftype}.scatter.png", sample=config["samples"], ftype=ftypes),
-
+        "chimeric_reads/counts.txt",
+        "ref.non_n.count.txt",
 
 def get_cram(sample):
     return f"{config['cram_path']}/{sample}/{sample}.md.cram" 
 
+
+rule picard_nonn_fasta:
+    output:
+        "ref.non_n.count.txt"
+    singularity: config["containers"]["picard"]
+    log: "ref.non_n.count.txt.log"
+    params:
+        fasta = config["fasta"]
+    shell:
+        "picard NonNFastaSize"
+        " I={params.fasta}"
+        " O={output}"
+        " &> {log}"
+    
 
 rule picard_wgs_metrics:
     input:
@@ -141,6 +156,22 @@ rule picard_insert_size_metrics:
         " R={params.fasta}"
         " &> {log}"
 
+rule picard_alignment_metrics:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        txt = "picard/{sample}.alignment_metrics.txt",
+    log: "picard/{sample}.alignment_metrics.txt.log"
+    singularity: config["containers"]["picard"]
+    params:
+        fasta = config["fasta"]
+    shell:
+        "picard CollectAlignmentSummaryMetrics"
+        " I={input.cram}"
+        " O={output.txt}"
+        " R={params.fasta}"
+        " MAX_INSERT_SIZE=10000"
+        " &> {log}"
 
 mosdepth_ext = [
     ".mosdepth.summary.txt", 
@@ -149,6 +180,62 @@ mosdepth_ext = [
     ".mosdepth.region.dist.txt"
 ]
 
+rule chimeric_reads:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        txt = "chimeric_reads/{sample}.txt"
+    singularity: config["containers"]["samtools"]
+    params:
+        max_len = 100_000,
+        fasta = config["fasta"]
+    shell:
+        "samtools view"
+        " -q 60" # Minimum mapping quality of 20
+        " -F 0x4" # Exclude unmapped reads
+        " -F 0x8" # Exclude mate unmapped
+        " -F 0x800" # Exclude supplementary alignments
+        " -e 'refid != mrefid || sqrt(pow(tlen,2)) >= {params.max_len}'"
+        " -c"
+        " -T {params.fasta}"
+        " {input.cram}"
+        " &> {output.txt}"
+
+
+
+rule all_reads:
+    input:
+        cram = lambda wc: get_cram(wc.sample)
+    output:
+        txt = "chimeric_reads/{sample}.all.txt"
+    log: "chimeric_reads/{sample}.all.txt.log"
+    singularity: config["containers"]["samtools"]
+    params:
+        fasta = config["fasta"]
+    shell:
+        "samtools view"
+        " -q 60" # Minimum mapping quality of 20
+        " -F 0x4" # Exclude unmapped reads
+        " -F 0x8" # Exclude mate unmapped
+        " -F 0x800" # Exclude supplementary alignments
+        " -c"
+        " -T {params.fasta}"
+        " {input.cram}"
+        " &> {output.txt}"
+
+rule count_reads:
+    input:
+        all = expand("chimeric_reads/{sample}.txt", sample=config["samples"]),
+        chimera = expand("chimeric_reads/{sample}.all.txt", sample=config["samples"]),
+    output:
+        "chimeric_reads/counts.txt"
+    run:
+        with open(output[0], "w") as f:
+            print("sample\tall_reads\tchimeric_reads", file=f)
+            for sample in config["samples"]:
+                all = int(open(f"chimeric_reads/{sample}.all.txt").read().strip())
+                chimera = int(open(f"chimeric_reads/{sample}.txt").read().strip())
+                print(f"{sample}\t{all}\t{chimera}", file=f)
 
 rule mosdepth:
     input:
@@ -230,11 +317,12 @@ rule cram_to_bam:
     singularity: config["containers"]["samtools"]
     threads: 2
     params:
-        ref = config["fasta"]
+        ref = config["fasta"],
     shell:
         "samtools view"
         " -@ {threads}"
         " -f 2" # Only properly paired reads
+        " -F 0x800" # Exclude supplementary alignments
         " -bh"
         " -T {params.ref}"
         " {input.cram}"
@@ -248,21 +336,27 @@ rule bam_to_bed:
     output:
         bed = "bam/{sample}.bed"
     log: "bam/{sample}.bed.log"
+    threads: 4
     params: 
-        bedtools = f'singularity exec {config["containers"]["bedtools"]}',
-        samtools = f'singularity exec {config["containers"]["samtools"]}',
+        bedtools = f'singularity exec {config["containers"]["bedtools"]} bedtools',
+        samtools = f'singularity exec {config["containers"]["samtools"]} samtools'
     shell:
-        "{params.samtools}"
-        " view"
-        " -f 1026" # Only properly paired non-duplicate reads
-        " -bh"
+        "{params.samtools} sort -n"
+        " -@ {threads}"
+        " -u"
         " {input.bam}"
-        " | "
-        "{params.bedtools}"
-        "bamToBed"
-        " -i stdin"
-        " > {output.bed}"
+        " -T $TMPDIR/{wildcards.sample}"
         " 2> {log}"
+        " | "
+        "{params.bedtools} bamtobed"
+        " -i stdin"
+        " -bedpe"
+        " 2>> {log}"
+        " | "
+        "cut -f 1,2,5"
+        " | "
+        "sort -k 1,1 -k 2,2n -k 3,3n"
+        " > {output.bed}"
 
 
 rule preseq_gc_extrap:
@@ -276,12 +370,53 @@ rule preseq_gc_extrap:
     shell:
         "preseq gc_extrap"
         " -o {output.txt}"
-        " -b 1" # 10 bp bins, default
         " -bed"
         " -v"
-        " -e 10000000000" # Extrapolate to 10B reads
-        " -D" # Defects mode
+        " -e 100000000000" # Extrapolate to 100B bases -> 333 M reads (2x150)
+        " -s 1000000000" # Step size 1B bases -> 3.3M reads
+        #" -D" # Defects mode
         " {input.bed}"
+        " &> {log}"
+
+rule to_mr:
+    # https://preseq.readthedocs.io/en/latest/
+    input:
+        bam = "bam/{sample}.bam"
+    output:
+        mr = "preseq/{sample}.mr",
+        mrtmp = "preseq/{sample}.mr.tmp"
+    log: "preseq/{sample}.mr.log"
+    singularity: config["containers"]["preseq"]
+    threads: 4
+    shell:
+        "to-mr"
+        " -o {output.mrtmp}"
+        " -L 10000" # Max insert size
+        " {input.bam}"
+        " -v"
+        " 2> {log}"
+        " && "
+        "sort"
+        " -k 1,1 -k 2,2n -k 3,3n"
+        " {output.mrtmp}"
+        " > {output.mr}"
+
+
+rule preseq_gc_extrap_mr:
+    # docs: https://preseq.readthedocs.io/en/latest/
+    input:
+        mr = "preseq/{sample}.mr"
+    output:
+        txt = touch("preseq/{sample}.mr.gc_extrap.txt")
+    log: "preseq/{sample}.mr.gc_extrap.txt.log"
+    singularity: config["containers"]["preseq"]
+    shell:
+        "preseq gc_extrap"
+        " -o {output.txt}"
+        " {input.mr}"
+        " -v"
+        " -e 100000000000" # Extrapolate to 100B bases -> 333 M reads (2x150)
+        " -s 1000000000" # Step size 1B bases -> 3.3M reads
         " &> {log}"
 
 
@@ -316,9 +451,11 @@ rule multiqc:
         expand("picard/{sample}.collect_wgs_metrics.txt", sample=config["samples"]),
         expand("picard/{sample}.gc_bias_metrics.txt", sample=config["samples"]),
         expand("picard/{sample}.insert_size_metrics.txt", sample=config["samples"]),
+        expand("picard/{sample}.alignment_metrics.txt", sample=config["samples"]),
         expand("mosdepth/{sample}.mosdepth.summary.txt", sample=config["samples"]),
         expand("idxstats/{sample}.idxstats.txt", sample=config["samples"]),
         expand("preseq/{sample}.gc_extrap.txt", sample=config["samples"]),
+        #expand("preseq/{sample}.mr.gc_extrap.txt", sample=config["samples"]),
         expand("preseq/{sample}.lc_extrap.txt", sample=config["samples"]),
         tsv = "multiqc_sample_names.tsv",
     output:

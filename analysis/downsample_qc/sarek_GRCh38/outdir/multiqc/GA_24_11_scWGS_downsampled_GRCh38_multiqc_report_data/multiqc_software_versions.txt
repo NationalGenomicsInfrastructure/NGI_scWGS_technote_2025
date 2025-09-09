@@ -1,0 +1,8 @@
+Sample	bwa	samtools	fastp	fastqc	gatk4	mosdepth	nf-core/sarek	Nextflow
+BWAMEM1_MEM	0.7.17.post1188	1.19.2						
+FASTP			0.23.4					
+FASTQC				0.12.1				
+GATK4 MarkDuplicates		1.19.2			4.5.0.0			
+Mosdepth						0.3.8		
+SAMTOOLS_STATS		1.19.2						
+Workflow							3.4.2	24.4.1

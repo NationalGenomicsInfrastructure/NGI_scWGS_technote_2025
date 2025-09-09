@@ -29,7 +29,7 @@ genome = "../../resources/GRCh38.genome"
 
 truth_sets = ["OGM", "PacBio_HiFi"]
 
-callers = ["copykit", "ginkgo"]
+callers = ["copykit", "ginkgo", "penncnv"]
 
 copykit_read_depth = ["2M", "40M", "full"]
 ginkgo_read_depth = ["2M", "40M"]
@@ -44,9 +44,9 @@ types = [
 
 wildcard_constraints:
     caller = '|'.join(callers),
-    reads = '|'.join(copykit_read_depth),
+    reads = '|'.join(copykit_read_depth + ["array"]),
     truth = '|'.join(truth_sets),
-    binsize = '|'.join(copykit_binsizes),
+    binsize = '|'.join(copykit_binsizes + ["none"]),
     type = '|'.join(types),
     sample = '|'.join(sample_list)
 
@@ -67,6 +67,11 @@ rule all:
             type=types,
         ),
         expand(
+            "agreement/penncnv/array/{truth}/none.{type}.tsv", 
+            truth=truth_sets, 
+            type=types,
+        ),
+        expand(
             "agreement_truthsets.{type}.tsv",
             type=types,
         )
@@ -82,6 +87,8 @@ def get_query_seg(wildcards):
             return "../basejumper/40M/CNV_Ginkgo_tertiary_data/Ginkgo_CNV1.seg"
         else:
             raise ValueError("Unknown ginkgo read depth: " + wildcards.reads)
+    elif wildcards.caller == "penncnv":
+        return f"../array_qc/penncnv/cnvs.all.seg"
     raise ValueError("Unknown caller: " + wildcards.caller)
 
 

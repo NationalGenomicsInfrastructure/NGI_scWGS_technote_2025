@@ -1,0 +1,38 @@
+# Samples
+samples:
+  - "P33410_1001"
+  - "P33410_1002"
+  - "P33410_1003"
+  - "P33410_1004"
+  - "P33410_1005"
+  - "P33410_1006"
+  - "P33410_1008"
+  - "P33410_1009"
+  - "P33410_1010"
+  - "P33410_1011"
+  - "P33410_1012"
+  - "P33410_1013"
+  - "P33410_1014"
+  - "P33410_1015"
+  - "P33410_1016"
+  - "P33410_1017"
+  - "P33410_1018"
+  - "P33410_1019"
+  - "P33410_1020"
+  - "P33410_1021"
+  - "P33410_1022"
+  - "P33410_1024"
+
+# Paths
+fasta: "../../data/ArrayGenotyping_snpseq01253/GRCh38_genome.fa"
+genes_flat: "/sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Annotation/Genes/refFlat.txt.gz"
+excluded_regions: "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/resources/HiFiCNV_excluded_regions/cnv.excluded_regions.common_50.hg38.bed.gz"
+
+# Executables
+dragena: "/vulpes/proj/ngis/ngi2016004/private/pontus/tools/dragena-linux-x64-DAv1.2.0-rc3-sha.3c7ece3a88eeeff572c7c97ab39da980714335c0/dragena/dragena"
+
+# Containers
+containers:
+  bedtools: "/vulpes/ngi/containers/biocontainers/quay.io-singularity-bedtools-2.30.0--hc088bd4_0.img"
+  bcftools: "/vulpes/ngi/containers/biocontainers/singularity-bcftools-1.20--h8b25389_0.img"
+  penncnv: "/proj/ngi2016004/private/pontus/tools/genomicslab_penncnv.sif"

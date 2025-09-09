@@ -7,7 +7,7 @@ load modules:
 
 sbatch command:
     
-    sbatch -A ngi2016004 -J contam -n 12 -p core -t 1-00:00:00 --wrap "snakemake -p -j 12 --use-singularity -k --rerun-incomplete" --mail-user phojer@kth.se --mail-type ALL
+    sbatch -A ngi2016004 -J contam -n 40 -p core -t 1-00:00:00 --wrap "snakemake -p -j 40 --use-singularity -k --rerun-incomplete" --mail-user phojer@kth.se --mail-type ALL
 """
 
 samples = [
@@ -46,11 +46,18 @@ kraken2 = "/vulpes/ngi/containers/biocontainers/depot.galaxyproject.org-singular
 multiqc = "/vulpes/common/ngi/containers/biocontainers/singularity-multiqc-1.21--pyhdfd78af_0.img"
 fastqc = "/vulpes/ngi/containers/biocontainers/singularity-fastqc-0.12.1--hdfd78af_0.img"
 
+types = [".full", ""]
+
+
+wildcard_constraints:
+    sample = "|".join(samples),
+    type = "|".join(types)
+
 
 rule all:
     input:
         #expand("fastqs/{sample}_{nr}.fastq.gz", sample=samples, nr=[1,2]),
-        expand("kraken2/{sample}.report", sample=samples),
+        expand("kraken2/{sample}{type}.report", sample=samples, type=types),
         "multiqc_report.html"
 
 
@@ -97,6 +104,19 @@ rule bbduk_filter_low_complexity:
         " &> {log}"
 
 
+rule get_fastq_full:
+    input:
+        fastq1 = "../../../data/P33410_downsampled/2M/{sample}.R1.fastq.gz",
+        fastq2 = "../../../data/P33410_downsampled/2M/{sample}.R2.fastq.gz"
+    output:
+        fastq1 = "fastqs/{sample}_1.full.fastq.gz",
+        fastq2 = "fastqs/{sample}_2.full.fastq.gz"
+    shell:
+        "ln -sr {input.fastq1} {output.fastq1}"
+        " && "
+        "ln -sr {input.fastq2} {output.fastq2}"
+
+
 rule fastqc:
     input:
         fastq = "{prefix}.fastq.gz"
@@ -115,20 +135,20 @@ rule fastqc:
 
 rule kraken2:
     input:
-        fastq1 = "fastqs/{sample}_1.filtered.fastq.gz",
-        fastq2 = "fastqs/{sample}_2.filtered.fastq.gz"
+        fastq1 = "fastqs/{sample}_1{type}.fastq.gz",
+        fastq2 = "fastqs/{sample}_2{type}.fastq.gz"
     output:
-        report = "kraken2/{sample}.report",
-        unclassified1 = temp("kraken2/{sample}.unclassified_1.fastq"),
-        unclassified2 = temp("kraken2/{sample}.unclassified_2.fastq"),
-        unclassified1gz = "kraken2/{sample}.unclassified_1.fastq.gz",
-        unclassified2gz = "kraken2/{sample}.unclassified_2.fastq.gz",
-    log: "kraken2/{sample}.log"
+        report = "kraken2/{sample}{type}.report",
+        unclassified1 = temp("kraken2/{sample}{type}.unclassified_1.fastq"),
+        unclassified2 = temp("kraken2/{sample}{type}.unclassified_2.fastq"),
+        unclassified1gz = "kraken2/{sample}{type}.unclassified_1.fastq.gz",
+        unclassified2gz = "kraken2/{sample}{type}.unclassified_2.fastq.gz",
+    log: "kraken2/{sample}{type}.log"
     singularity: kraken2
-    threads: 10
+    threads: 12
     params:
         db = kraken_db,
-        unclassified_template = lambda wildcards: f"kraken2/{wildcards.sample}.unclassified#.fastq"
+        unclassified_template = lambda wildcards: f"kraken2/{wildcards.sample}{wildcards.type}.unclassified#.fastq"
     shell:
         "kraken2"
         " --db {params.db}"
@@ -146,10 +166,10 @@ rule kraken2:
 
 rule multiqc:
     input:
-        expand("kraken2/{sample}.report", sample=samples),
+        expand("kraken2/{sample}{type}.report", sample=samples, type=types),
         expand("fastqs/{sample}_{nr}.filtered_fastqc.zip", sample=samples, nr=[1,2]),
         expand("fastqs/{sample}_{nr}_fastqc.zip", sample=samples, nr=[1,2]),
-        expand("kraken2/{sample}.unclassified_{nr}_fastqc.zip", sample=samples, nr=[1,2]),
+        expand("kraken2/{sample}{type}.unclassified_{nr}_fastqc.zip", sample=samples, type=types, nr=[1,2]),
     output:
         html = "multiqc_report.html",
         data = directory("multiqc_data"),

@@ -1,0 +1,67 @@
+Module	Section	Sample Name	Source
+FastQC (raw)	all_sections	P33410_1005-L003_1	/scratch/8861088/nxf.bTXJBagEHL/29/P33410_1005-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1008-L003_1	/scratch/8861088/nxf.bTXJBagEHL/43/P33410_1008-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1003-L003_2	/scratch/8861088/nxf.bTXJBagEHL/34/P33410_1003-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1009-L003_1	/scratch/8861088/nxf.bTXJBagEHL/41/P33410_1009-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1006-L003_1	/scratch/8861088/nxf.bTXJBagEHL/37/P33410_1006-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1003-L003_1	/scratch/8861088/nxf.bTXJBagEHL/33/P33410_1003-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1009-L003_2	/scratch/8861088/nxf.bTXJBagEHL/42/P33410_1009-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1001-L003_1	/scratch/8861088/nxf.bTXJBagEHL/45/P33410_1001-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1002-L003_1	/scratch/8861088/nxf.bTXJBagEHL/39/P33410_1002-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1006-L003_2	/scratch/8861088/nxf.bTXJBagEHL/38/P33410_1006-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1004-L003_1	/scratch/8861088/nxf.bTXJBagEHL/31/P33410_1004-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1010-L003_1	/scratch/8861088/nxf.bTXJBagEHL/35/P33410_1010-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1012-L003_2	/scratch/8861088/nxf.bTXJBagEHL/26/P33410_1012-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1005-L003_2	/scratch/8861088/nxf.bTXJBagEHL/30/P33410_1005-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1011-L003_2	/scratch/8861088/nxf.bTXJBagEHL/28/P33410_1011-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1011-L003_1	/scratch/8861088/nxf.bTXJBagEHL/27/P33410_1011-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1002-L003_2	/scratch/8861088/nxf.bTXJBagEHL/40/P33410_1002-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1010-L003_2	/scratch/8861088/nxf.bTXJBagEHL/36/P33410_1010-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1001-L003_2	/scratch/8861088/nxf.bTXJBagEHL/46/P33410_1001-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1008-L003_2	/scratch/8861088/nxf.bTXJBagEHL/44/P33410_1008-L003_2_fastqc.zip
+FastQC (raw)	all_sections	P33410_1012-L003_1	/scratch/8861088/nxf.bTXJBagEHL/25/P33410_1012-L003_1_fastqc.zip
+FastQC (raw)	all_sections	P33410_1004-L003_2	/scratch/8861088/nxf.bTXJBagEHL/32/P33410_1004-L003_2_fastqc.zip
+FastP (Read preprocessing)	all_sections	P33410_1006-L003	/scratch/8861088/nxf.bTXJBagEHL/24/P33410_1006-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1002-L003	/scratch/8861088/nxf.bTXJBagEHL/18/P33410_1002-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1008-L003	/scratch/8861088/nxf.bTXJBagEHL/22/P33410_1008-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1009-L003	/scratch/8861088/nxf.bTXJBagEHL/17/P33410_1009-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1005-L003	/scratch/8861088/nxf.bTXJBagEHL/16/P33410_1005-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1001-L003	/scratch/8861088/nxf.bTXJBagEHL/21/P33410_1001-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1012-L003	/scratch/8861088/nxf.bTXJBagEHL/14/P33410_1012-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1003-L003	/scratch/8861088/nxf.bTXJBagEHL/20/P33410_1003-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1010-L003	/scratch/8861088/nxf.bTXJBagEHL/23/P33410_1010-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1004-L003	/scratch/8861088/nxf.bTXJBagEHL/19/P33410_1004-L003.fastp.json
+FastP (Read preprocessing)	all_sections	P33410_1011-L003	/scratch/8861088/nxf.bTXJBagEHL/15/P33410_1011-L003.fastp.json
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1011-L003.md	/scratch/8861088/nxf.bTXJBagEHL/51/P33410_1011.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1001-L003.md	/scratch/8861088/nxf.bTXJBagEHL/82/P33410_1001.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1008-L003.md	/scratch/8861088/nxf.bTXJBagEHL/80/P33410_1008.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1002-L003.md	/scratch/8861088/nxf.bTXJBagEHL/66/P33410_1002.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1005-L003.md	/scratch/8861088/nxf.bTXJBagEHL/54/P33410_1005.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1010-L003.md	/scratch/8861088/nxf.bTXJBagEHL/67/P33410_1010.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1009-L003.md	/scratch/8861088/nxf.bTXJBagEHL/75/P33410_1009.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1012-L003.md	/scratch/8861088/nxf.bTXJBagEHL/48/P33410_1012.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1006-L003.md	/scratch/8861088/nxf.bTXJBagEHL/72/P33410_1006.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1004-L003.md	/scratch/8861088/nxf.bTXJBagEHL/60/P33410_1004.md.cram.metrics
+GATK4 MarkDuplicates	DuplicationMetrics	P33410_1003-L003.md	/scratch/8861088/nxf.bTXJBagEHL/59/P33410_1003.md.cram.metrics
+Samtools Flagstat	stats	P33410_1008.md	/scratch/8861088/nxf.bTXJBagEHL/90/P33410_1008.md.cram.stats
+Samtools Flagstat	stats	P33410_1001.md	/scratch/8861088/nxf.bTXJBagEHL/91/P33410_1001.md.cram.stats
+Samtools Flagstat	stats	P33410_1005.md	/scratch/8861088/nxf.bTXJBagEHL/63/P33410_1005.md.cram.stats
+Samtools Flagstat	stats	P33410_1011.md	/scratch/8861088/nxf.bTXJBagEHL/58/P33410_1011.md.cram.stats
+Samtools Flagstat	stats	P33410_1010.md	/scratch/8861088/nxf.bTXJBagEHL/83/P33410_1010.md.cram.stats
+Samtools Flagstat	stats	P33410_1012.md	/scratch/8861088/nxf.bTXJBagEHL/57/P33410_1012.md.cram.stats
+Samtools Flagstat	stats	P33410_1004.md	/scratch/8861088/nxf.bTXJBagEHL/79/P33410_1004.md.cram.stats
+Samtools Flagstat	stats	P33410_1009.md	/scratch/8861088/nxf.bTXJBagEHL/89/P33410_1009.md.cram.stats
+Samtools Flagstat	stats	P33410_1002.md	/scratch/8861088/nxf.bTXJBagEHL/81/P33410_1002.md.cram.stats
+Samtools Flagstat	stats	P33410_1006.md	/scratch/8861088/nxf.bTXJBagEHL/88/P33410_1006.md.cram.stats
+Samtools Flagstat	stats	P33410_1003.md	/scratch/8861088/nxf.bTXJBagEHL/78/P33410_1003.md.cram.stats
+Mosdepth	genome_results	P33410_1010.md	/scratch/8861088/nxf.bTXJBagEHL/70/P33410_1010.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1011.md	/scratch/8861088/nxf.bTXJBagEHL/52/P33410_1011.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1009.md	/scratch/8861088/nxf.bTXJBagEHL/76/P33410_1009.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1005.md	/scratch/8861088/nxf.bTXJBagEHL/55/P33410_1005.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1012.md	/scratch/8861088/nxf.bTXJBagEHL/49/P33410_1012.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1006.md	/scratch/8861088/nxf.bTXJBagEHL/73/P33410_1006.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1004.md	/scratch/8861088/nxf.bTXJBagEHL/64/P33410_1004.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1002.md	/scratch/8861088/nxf.bTXJBagEHL/68/P33410_1002.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1003.md	/scratch/8861088/nxf.bTXJBagEHL/61/P33410_1003.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1001.md	/scratch/8861088/nxf.bTXJBagEHL/86/P33410_1001.md.mosdepth.region.dist.txt
+Mosdepth	genome_results	P33410_1008.md	/scratch/8861088/nxf.bTXJBagEHL/84/P33410_1008.md.mosdepth.region.dist.txt
