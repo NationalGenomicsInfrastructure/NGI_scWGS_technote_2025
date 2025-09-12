@@ -1,47 +1,45 @@
-[2025-06-23 17:32:20,136] multiqc                                            [DEBUG  ]  This is MultiQC v1.21
-[2025-06-23 17:32:20,254] multiqc                                            [DEBUG  ]  Loading config settings from: multiqc_config.yaml
-[2025-06-23 17:32:20,254] multiqc                                            [DEBUG  ]  New config: {'mosdepth_config': {'exclude_contigs': ['*_alt', '*_decoy', '*_random', 'chrUn*', 'HLA*', 'MT', 'chrM', 'chrEBV']}, 'picard_config': {'s_name_filenames': True}}
-[2025-06-23 17:32:20,255] multiqc                                            [DEBUG  ]  Added to filename clean trimmings: [['.collect_wgs_metrics', '.gc_bias_metrics', '.insert_size_metrics', '.lc_extrap', '.md']]
-[2025-06-23 17:32:20,255] multiqc                                            [DEBUG  ]  Command used: /usr/local/bin/multiqc -m picard -m mosdepth -m samtools -m preseq --sample-names multiqc_sample_names.tsv . -v
-[2025-06-23 17:32:24,309] multiqc                                            [DEBUG  ]  Timed out after waiting for 2s for multiqc.info to check latest version: HTTPSConnectionPool(host='api.multiqc.info', port=443): Max retries exceeded with url: /version?version_multiqc=1.21&version_python=3.11.8&operating_system=Linux&is_docker=False&is_singularity=True&is_conda=True&is_ci=False (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x14f53be88950>, 'Connection to api.multiqc.info timed out. (connect timeout=2)'))
-[2025-06-23 17:32:24,309] multiqc                                            [DEBUG  ]  Loading sample renaming config settings from: multiqc_sample_names.tsv
-[2025-06-23 17:32:24,346] multiqc                                            [DEBUG  ]  Found 2 sample renaming patterns
-[2025-06-23 17:32:24,346] multiqc                                            [DEBUG  ]  Working dir : /vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/downstream
-[2025-06-23 17:32:24,346] multiqc                                            [DEBUG  ]  Template    : default
-[2025-06-23 17:32:24,347] multiqc                                            [DEBUG  ]  Running Python 3.11.8 | packaged by conda-forge | (main, Feb 16 2024, 20:53:32) [GCC 12.3.0]
-[2025-06-23 17:32:24,347] multiqc                                            [INFO   ]  Only using modules: picard, mosdepth, samtools, preseq
-[2025-06-23 17:32:24,347] multiqc                                            [DEBUG  ]  Analysing modules: mosdepth, preseq, picard, samtools
-[2025-06-23 17:32:24,347] multiqc                                            [DEBUG  ]  Using temporary directory for creating report: /scratch/9760941/tmpi4_p6l3g
-[2025-06-23 17:32:24,350] multiqc                                            [INFO   ]  Search path : /vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/downstream
-[2025-06-23 17:32:24,350] multiqc                                            [DEBUG  ]  Ignored 299 search patterns as didn't match running modules.
-[2025-06-23 17:34:36,776] multiqc                                            [DEBUG  ]  Summary of files that were skipped by the search: [skipped_no_match: 2572] // [skipped_ignore_pattern: 179]
-[2025-06-23 17:34:36,806] multiqc.modules.mosdepth.mosdepth                  [DEBUG  ]  Excluding these contigs from mosdepth: *_alt, *_decoy, *_random, chrUn*, HLA*, MT, chrM, chrEBV
-[2025-06-23 17:34:44,317] multiqc.modules.mosdepth.mosdepth                  [INFO   ]  Found reports for 22 samples
-[2025-06-23 17:34:44,318] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file mosdepth_cumcov_dist.txt
-[2025-06-23 17:34:44,360] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file mosdepth_cov_dist.txt
-[2025-06-23 17:34:44,365] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file mosdepth_perchrom.txt
-[2025-06-23 17:34:44,384] multiqc.modules.mosdepth.mosdepth                  [DEBUG  ]  Using default coverage thresholds: 1, 5, 10, 30, 50
-[2025-06-23 17:34:44,401] multiqc.modules.preseq.preseq                      [INFO   ]  Found 22 reports
-[2025-06-23 17:34:44,497] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file preseq.txt
-[2025-06-23 17:34:44,539] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_picard_AlignmentSummaryMetrics.txt
-[2025-06-23 17:34:44,547] multiqc.modules.picard.picard                      [INFO   ]  Found 22 AlignmentSummaryMetrics reports
-[2025-06-23 17:34:44,567] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_picard_gcbias.txt
-[2025-06-23 17:34:44,567] multiqc.modules.picard.picard                      [INFO   ]  Found 44 GcBiasMetrics reports
-[2025-06-23 17:34:44,593] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_picard_insertSize.txt
-[2025-06-23 17:34:44,746] multiqc.modules.picard.picard                      [INFO   ]  Found 22 InsertSizeMetrics reports
-[2025-06-23 17:34:44,746] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file picard_histogram.txt
-[2025-06-23 17:34:44,747] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file picard_histogram_1.txt
-[2025-06-23 17:34:44,754] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_picard_wgsmetrics.txt
-[2025-06-23 17:34:44,763] multiqc.modules.picard.picard                      [INFO   ]  Found 22 WgsMetrics reports
-[2025-06-23 17:34:44,763] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file picard_histogram_2.txt
-[2025-06-23 17:34:45,749] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_samtools_idxstats.txt
-[2025-06-23 17:34:45,760] multiqc.modules.samtools.samtools                  [INFO   ]  Found 22 idxstats reports
-[2025-06-23 17:34:45,760] multiqc.utils.software_versions                    [DEBUG  ]  Reading software versions from config.software_versions
-[2025-06-23 17:34:45,808] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_general_stats.txt
-[2025-06-23 17:34:45,808] multiqc                                            [DEBUG  ]  Compressing plot data
-[2025-06-23 17:34:46,773] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_data.json
-[2025-06-23 17:34:46,774] multiqc                                            [INFO   ]  Report      : multiqc_report.html
-[2025-06-23 17:34:46,774] multiqc                                            [INFO   ]  Data        : multiqc_data
-[2025-06-23 17:34:46,774] multiqc                                            [DEBUG  ]  Moving data file from '/scratch/9760941/tmpi4_p6l3g/multiqc_data' to '/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/downstream/multiqc_data'
-[2025-06-23 17:34:46,902] multiqc                                            [DEBUG  ]  Full report path: /vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/downstream/multiqc_report.html
-[2025-06-23 17:34:47,018] multiqc                                            [INFO   ]  MultiQC complete
+[2025-09-11 11:24:19,712] multiqc                                            [DEBUG  ]  This is MultiQC v1.21
+[2025-09-11 11:24:19,756] multiqc                                            [DEBUG  ]  Loading config settings from: multiqc_config.yaml
+[2025-09-11 11:24:19,756] multiqc                                            [DEBUG  ]  New config: {'mosdepth_config': {'exclude_contigs': ['*_alt', '*_decoy', '*_random', 'chrUn*', 'HLA*', 'MT', 'chrM', 'chrEBV']}, 'picard_config': {'s_name_filenames': True}}
+[2025-09-11 11:24:19,756] multiqc                                            [DEBUG  ]  Added to filename clean trimmings: [['.collect_wgs_metrics', '.gc_bias_metrics', '.insert_size_metrics', '.lc_extrap', '.md']]
+[2025-09-11 11:24:19,756] multiqc                                            [DEBUG  ]  Command used: /usr/local/bin/multiqc -m picard -m mosdepth -m preseq --sample-names multiqc_sample_names.tsv . -v
+[2025-09-11 11:24:23,800] multiqc                                            [DEBUG  ]  Timed out after waiting for 2s for multiqc.info to check latest version: HTTPSConnectionPool(host='api.multiqc.info', port=443): Max retries exceeded with url: /version?version_multiqc=1.21&version_python=3.11.8&operating_system=Linux&is_docker=False&is_singularity=True&is_conda=True&is_ci=False (Caused by ConnectTimeoutError(<urllib3.connection.HTTPSConnection object at 0x145f534bcb10>, 'Connection to api.multiqc.info timed out. (connect timeout=2)'))
+[2025-09-11 11:24:23,800] multiqc                                            [DEBUG  ]  Loading sample renaming config settings from: multiqc_sample_names.tsv
+[2025-09-11 11:24:23,864] multiqc                                            [DEBUG  ]  Found 2 sample renaming patterns
+[2025-09-11 11:24:23,864] multiqc                                            [DEBUG  ]  Working dir : /vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/downstream
+[2025-09-11 11:24:23,864] multiqc                                            [DEBUG  ]  Template    : default
+[2025-09-11 11:24:23,864] multiqc                                            [DEBUG  ]  Running Python 3.11.8 | packaged by conda-forge | (main, Feb 16 2024, 20:53:32) [GCC 12.3.0]
+[2025-09-11 11:24:23,864] multiqc                                            [INFO   ]  Only using modules: picard, mosdepth, preseq
+[2025-09-11 11:24:23,865] multiqc                                            [DEBUG  ]  Analysing modules: mosdepth, preseq, picard
+[2025-09-11 11:24:23,865] multiqc                                            [DEBUG  ]  Using temporary directory for creating report: /scratch/tmp1_f0h044
+[2025-09-11 11:24:23,866] multiqc                                            [INFO   ]  Search path : /vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/downstream
+[2025-09-11 11:24:23,866] multiqc                                            [DEBUG  ]  Ignored 304 search patterns as didn't match running modules.
+[2025-09-11 11:26:20,436] multiqc                                            [DEBUG  ]  Summary of files that were skipped by the search: [skipped_no_match: 2619] // [skipped_ignore_pattern: 179]
+[2025-09-11 11:26:20,464] multiqc.modules.mosdepth.mosdepth                  [DEBUG  ]  Excluding these contigs from mosdepth: *_alt, *_decoy, *_random, chrUn*, HLA*, MT, chrM, chrEBV
+[2025-09-11 11:26:27,461] multiqc.modules.mosdepth.mosdepth                  [INFO   ]  Found reports for 22 samples
+[2025-09-11 11:26:27,462] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file mosdepth_cumcov_dist.txt
+[2025-09-11 11:26:27,505] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file mosdepth_cov_dist.txt
+[2025-09-11 11:26:27,510] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file mosdepth_perchrom.txt
+[2025-09-11 11:26:27,530] multiqc.modules.mosdepth.mosdepth                  [DEBUG  ]  Using default coverage thresholds: 1, 5, 10, 30, 50
+[2025-09-11 11:26:27,548] multiqc.modules.preseq.preseq                      [INFO   ]  Found 22 reports
+[2025-09-11 11:26:27,652] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file preseq.txt
+[2025-09-11 11:26:27,694] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_picard_AlignmentSummaryMetrics.txt
+[2025-09-11 11:26:27,704] multiqc.modules.picard.picard                      [INFO   ]  Found 22 AlignmentSummaryMetrics reports
+[2025-09-11 11:26:27,724] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_picard_gcbias.txt
+[2025-09-11 11:26:27,724] multiqc.modules.picard.picard                      [INFO   ]  Found 44 GcBiasMetrics reports
+[2025-09-11 11:26:27,753] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_picard_insertSize.txt
+[2025-09-11 11:26:27,908] multiqc.modules.picard.picard                      [INFO   ]  Found 22 InsertSizeMetrics reports
+[2025-09-11 11:26:27,909] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file picard_histogram.txt
+[2025-09-11 11:26:27,909] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file picard_histogram_1.txt
+[2025-09-11 11:26:27,917] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_picard_wgsmetrics.txt
+[2025-09-11 11:26:27,926] multiqc.modules.picard.picard                      [INFO   ]  Found 22 WgsMetrics reports
+[2025-09-11 11:26:27,926] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file picard_histogram_2.txt
+[2025-09-11 11:26:27,926] multiqc.utils.software_versions                    [DEBUG  ]  Reading software versions from config.software_versions
+[2025-09-11 11:26:27,978] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_general_stats.txt
+[2025-09-11 11:26:27,979] multiqc                                            [DEBUG  ]  Compressing plot data
+[2025-09-11 11:26:28,902] multiqc.utils.util_functions                       [DEBUG  ]  Wrote data file multiqc_data.json
+[2025-09-11 11:26:28,903] multiqc                                            [INFO   ]  Report      : multiqc_report.html
+[2025-09-11 11:26:28,903] multiqc                                            [INFO   ]  Data        : multiqc_data
+[2025-09-11 11:26:28,903] multiqc                                            [DEBUG  ]  Moving data file from '/scratch/tmp1_f0h044/multiqc_data' to '/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/downstream/multiqc_data'
+[2025-09-11 11:26:28,925] multiqc                                            [DEBUG  ]  Full report path: /vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/analysis/downsample_40M/downstream/multiqc_report.html
+[2025-09-11 11:26:29,037] multiqc                                            [INFO   ]  MultiQC complete

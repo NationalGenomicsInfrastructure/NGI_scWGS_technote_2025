@@ -2,3 +2,4 @@
 *.gsheet
 __pycache__
 .snakemake/
+.snakemake_timestamp

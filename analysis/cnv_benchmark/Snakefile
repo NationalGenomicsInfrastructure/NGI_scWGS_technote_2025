@@ -6,7 +6,6 @@ sample_list = [
     "P33410_1004",
     "P33410_1005",
     "P33410_1006",
-    #"P33410_1007",
     "P33410_1008",
     "P33410_1009",
     "P33410_1010",
@@ -22,12 +21,11 @@ sample_list = [
     "P33410_1020",
     "P33410_1021",
     "P33410_1022",
-    #"P33410_1023",
     "P33410_1024"
 ]
 genome = "../../resources/GRCh38.genome"
 
-truth_sets = ["OGM", "PacBio_HiFi"]
+truth_sets = ["PacBio_HiFi"]
 
 callers = ["copykit", "ginkgo", "penncnv"]
 
@@ -93,9 +91,7 @@ def get_query_seg(wildcards):
 
 
 def get_truth(name):
-    if name == "OGM":
-        return "../../resources/OGM_CNVs/cnv_calls.chr.seg"
-    elif name == "PacBio_HiFi":
+    if name == "PacBio_HiFi":
         return "../../resources/PacBioHiFi_pr_023_003_MM1S_hificnv/MM1S_excluded.pr_023_003.seg"
     raise ValueError("Unknown truth set: " + name)
 
@@ -119,28 +115,6 @@ rule cnv_benchmark:
         "python {params.script}"
         " {input.query_seg}"
         " {input.truth_seg}"
-        " --fai {params.genome}"
-        " --ploidy 2"
-        " {params.gl_mode}"
-        " > {output.tsv}"
-        " 2> {log}"
-
-
-rule cnv_benchmark_truth:
-    input:
-        ogm = get_truth("OGM"),
-        pb = get_truth("PacBio_HiFi"),
-    output:
-        tsv = "agreement_truthsets.{type}.tsv"
-    log: "agreement_truthsets.{type}.tsv.log"
-    params:
-        genome = genome,
-        script = "../../scripts/cnv_agreement.py",
-        gl_mode = lambda wc: "--gl" if "gl" in wc.type else "",
-    shell:
-        "python {params.script}"
-        " {input.ogm}"
-        " {input.pb}"
         " --fai {params.genome}"
         " --ploidy 2"
         " {params.gl_mode}"

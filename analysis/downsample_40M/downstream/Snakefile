@@ -16,27 +16,14 @@ min_version("6.0")
 
 configfile: "workflow_config.yaml"
 
-ftypes = ["", ".filtered", ".call", ".cnv"]
-
 wildcard_constraints:
     sample = "|".join(config["samples"]),
-    ftype = "|".join(ftypes)
 
 rule all:
     input:
         "multiqc_report.html",
         expand("mosdepth_100kb/bedgraph/{sample}.regions.bedgraph", sample=config["samples"]),
-        expand("cnvkit/{sample}/{sample}.regions.cns", sample=config["samples"]),
-        expand("cnvkit/heatmap_GRCh38{ftype}_mqc.png", ftype=ftypes),
-        expand("cnvkit/{sample}/{sample}.regions.filtered.bintest.cns", sample=config["samples"]),
-        expand("cnvkit/{sample}/{sample}.regions.log2.bedgraph", sample=config["samples"]),
-        "cnvkit/metrics.tsv",
-        expand("cnvkit/GRCh38{ftype}.seg", ftype=ftypes),
-        expand("cnvkit/{sample}/{sample}.regions{ftype}.cns", sample=config["samples"], ftype=ftypes),
-        expand("cnvkit/{sample}/{sample}.regions{ftype}.vcf", sample=config["samples"], ftype=ftypes),
-        expand("cnvkit/{sample}/{sample}.regions{ftype}.scatter.png", sample=config["samples"], ftype=ftypes),
         "chimeric_reads/counts.txt",
-        "ref.non_n.count.txt",
 
 
 module main_workflow:
