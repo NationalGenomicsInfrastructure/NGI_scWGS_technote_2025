@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17296102.svg)](https://doi.org/10.5281/zenodo.17296102)
 # WGS on single cells with BioScryb and Qiagen kits
 
 BioScryb kit: ResolveDNA Library Preparation Kit
