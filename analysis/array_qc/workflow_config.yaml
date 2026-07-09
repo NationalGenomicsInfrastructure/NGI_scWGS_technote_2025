@@ -27,7 +27,8 @@ samples:
 fasta: "../../data/ArrayGenotyping_snpseq01253/GRCh38_genome.fa"
 genes_flat: "/sw/data/igenomes/Homo_sapiens/NCBI/GRCh38/Annotation/Genes/refFlat.txt.gz"
 excluded_regions: "/vulpes/proj/ngis/ngi2016004/private/pontus/GA_24_11_scWGS/resources/HiFiCNV_excluded_regions/cnv.excluded_regions.common_50.hg38.bed.gz"
-
+truth_vcf: "/vulpes/proj/ngis/ngi2016004/private/strategic_proj/SR_23_02_Element_vs_Illumina/analysis/variant_call_benchmarking_allchr/deepvariant/pacbio/MM1S_PASS.vcf.gz"
+sdf: "/vulpes/proj/ngis/ngi2016004/private/strategic_proj/SR_23_02_Element_vs_Illumina/analysis/variant_call_benchmarking_allchr/GRCh38.sdf"
 # Executables
 dragena: "/vulpes/proj/ngis/ngi2016004/private/pontus/tools/dragena-linux-x64-DAv1.2.0-rc3-sha.3c7ece3a88eeeff572c7c97ab39da980714335c0/dragena/dragena"
 
@@ -36,3 +37,4 @@ containers:
   bedtools: "/vulpes/ngi/containers/biocontainers/quay.io-singularity-bedtools-2.30.0--hc088bd4_0.img"
   bcftools: "/vulpes/ngi/containers/biocontainers/singularity-bcftools-1.20--h8b25389_0.img"
   penncnv: "/proj/ngi2016004/private/pontus/tools/genomicslab_penncnv.sif"
+  happy: "/vulpes/proj/ngis/ngi2016004/private/pontus/tools/hap.py_rtg-tools_2ebb433f3ce976d3.img"

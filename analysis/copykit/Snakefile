@@ -11,6 +11,7 @@ sbatch command:
 """
 
 from pathlib import Path
+import pandas as pd
 
 all_samples = [
     "P33410_1001",
@@ -127,7 +128,6 @@ rule copykit_report:
         html = "copykit/{data}/{resolution}_report.html",
         cn_tsv = "copykit/{data}/{resolution}_cn.tsv",
         row_tsv = "copykit/{data}/{resolution}_rowrange.tsv",
-        cn = directory("copykit/{data}/{resolution}_copy_numbers")
     singularity: copykit
     log: "copykit/{data}/{resolution}_report.log"
     params:
@@ -144,21 +144,38 @@ rule copykit_report:
 
 rule write_seg_file:
     input:
-        cn = "copykit/{data}/{resolution}_copy_numbers"
+        cn_tsv = "copykit/{data}/{resolution}_cn.tsv",
+        row_tsv = "copykit/{data}/{resolution}_rowrange.tsv",
     output:
         seg = "copykit/{data}/{resolution}.seg"
     run:
-        import glob
         with open(output.seg, "w") as f:
             print("#type=COPY_NUMBER", file=f)
-            print("id\tchromosome\tstart\tend\tcn", file=f)
-            for cn_file in sorted(Path(input.cn).rglob("*.tsv")):
-                sample = cn_file.stem
-                with open(cn_file) as cn:
-                    next(cn) # Skip header
-                    for line in cn:
-                        els = line.strip().split("\t")
-                        print(sample, *els, sep="\t", file=f)
+
+        cn = pd.read_csv(input.cn_tsv, sep="\t")
+        samples = cn.columns.values
+        
+        coords = pd.read_csv(input.row_tsv, sep="\t", usecols=["seqnames", "start", "end"])
+        coords.columns = ["chromosome", "start", "end"]
+        df = pd.concat([coords, cn], axis=1)
+        df = df.melt(
+            id_vars=["chromosome", "start", "end"],
+            value_vars=samples, 
+            var_name="id", 
+            value_name="cn"
+        )
+        df["group"] = ((df.id != df.id.shift()) | (df.cn != df.cn.shift()) | (df.chromosome != df.chromosome.shift())).cumsum()
+        df = df.groupby("group").agg({
+            "id": "first",
+            "chromosome": "first",
+            "start": "min", 
+            "end": "max",
+            "cn": "first"
+        }).reset_index()
+        df = df.sort_values(["id", "chromosome", "start"])
+        df = df[["id", "chromosome", "start", "end", "cn"]]
+
+        df.to_csv(output.seg, sep="\t", index=False, header=True, mode="a")
 
 
 rule seg_to_vcf:

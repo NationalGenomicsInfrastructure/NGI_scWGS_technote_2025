@@ -34,11 +34,19 @@ def get_samples(samplesheet):
         samples = [s for s in samples if not s["Sample_ID"].startswith("CEP")] 
         
         # Extract samples names and insert
-        samples = [dict(**s, name=s["Sample_ID"].split(".")[0][8:]) for s in samples]
+        samples = [
+            dict(
+                **s, 
+                name=s["Sample_ID"].split(".")[0][8:],
+                prefix=f"{s['SentrixBarcode_A']}_{s['SentrixPosition_A']}",
+            ) 
+            for s in samples
+        ]
     
     return samples
 
 samples = get_samples(samplesheet)
+prefixes = [sample['prefix'] for sample in samples]
 
 include: "penncnv.smk"
 
@@ -57,7 +65,9 @@ rule all:
         expand("bedgraph/{sample}.{type}.bedgraph", type=["LRR","BAF"], sample=[s["name"] for s in samples]),
         expand("bedgraph_100kb/{sample}.LRR.bedgraph", sample=[s["name"] for s in samples]),
         expand("bedgraph_100kb_qc/{sample}.LRR.bedgraph", sample=[s["name"] for s in samples]),
-        "penncnv/cnvs.all.seg"
+        "penncnv/cnvs.all.seg",
+        expand("dragena_snvs/{sample}.vcf.gz", sample=[s["name"] for s in samples]),
+        expand("happy/{sample}/{sample}_vspacbio.summary.csv", sample=[s["name"] for s in samples])
 
 
 rule dragena_genotype_call:
@@ -227,7 +237,8 @@ rule dragena_genotype_vcf:
         bpm_mainfest = basedir / "GSA-24v3-0_A2.bpm",
         gtc_folder = "dragena_genotype_call",
     output:
-        dir = directory("dragena_genotype_vcf")
+        dir = directory("dragena_genotype_vcf"),
+        vcfs = expand("dragena_genotype_vcf/{prefix}.snv.vcf.gz", prefix=prefixes)
     log: "dragena_genotype_vcf.log"
     params:
         dragena = config["dragena"],
@@ -375,3 +386,101 @@ rule rename_cnv_vcf:
         " -o {output.vcf}"
         " -s {input.txt}"
         " {input.vcf}"
+
+#
+# SNV Benchmarking
+#
+
+rule rename_chrs:
+    output:
+        txt = "chr_replace.txt"
+    run:
+        with open(output.txt, "w") as f:
+            for chrom in list(range(1,23)) + ["X"]:
+                print(chrom, f"chr{chrom}", sep=" ", file=f)
+
+
+def get_vcf(wc):
+    prefix = [s for s in samples if s["name"] == wc.sample][0]["prefix"]
+    return f"dragena_genotype_vcf/{prefix}.snv.vcf.gz"
+
+
+rule convert_vcfs:
+    input:
+        vcf = get_vcf,
+        txt = "chr_replace.txt"
+    output:
+        vcf = "dragena_snvs/{sample}.vcf.gz",
+    singularity: config["containers"]["bcftools"]
+    shell:
+        "bcftools annotate"
+        " --rename-chrs {input.txt}"
+        " -Oz"
+        " -o {output.vcf}"
+        " {input.vcf}"
+
+# rule rename_vcfs:
+#     input:
+#         vcf = get_vcf,
+#     output:
+#         vcf = "dragena_snvs/{sample}.vcf.gz",
+#     shell:
+#         "cp {input.vcf}  {output.vcf}"
+
+
+rule regions:
+    input:
+        vcfs = expand("dragena_snvs/{sample}.vcf.gz", sample=[s["name"] for s in samples])
+    output:
+        bed = "snvs.bed"
+    singularity: config["containers"]["bedtools"]
+    params:
+        fai = config["fasta"] + ".fai",
+        n = lambda wc, input: len(input)
+    shell:
+        "bedtools multiinter"
+        " -i {input.vcfs}"
+        " | "
+        "awk '$4=={params.n}'"
+        # " | "
+        # "awk '{{OFS=\"\\t\"; print $1,$2-5,$3+5}}'"
+        " > {output.bed}"
+        
+rule rgt_format:
+    output:
+        directory("GRCh38.sdf")
+    params:
+        fasta = config["fasta"],
+    singularity: config["containers"]["happy"]
+    shell:
+        "rtg format -o {output} {params.fasta}"
+
+rule happy:
+    input:
+        vcf = "dragena_snvs/{sample}.vcf.gz",
+        tbi = "dragena_snvs/{sample}.vcf.gz.tbi",
+        bed = "snvs.bed",
+        sdf = "GRCh38.sdf"
+    output:
+        csv = "happy/{sample}/{sample}_vspacbio.summary.csv"
+    singularity: config["containers"]["happy"]
+    log: "happy/{sample}/{sample}_vspacbio.log"
+    threads: 1
+    params:
+        prefix = "happy/{sample}/{sample}_vspacbio",
+        ref = "/vulpes/proj/ngis/ngi2016004/private/strategic_proj/SR_23_02_Element_vs_Illumina/resources/GRCh38_GIABv3/unbgzipped/genome.fa", #config["fasta"],
+        sdf = config["sdf"],
+        truth = config["truth_vcf"],
+        pwd = os.getcwd()
+    shell:
+        "hap.py"
+        " --reference {params.ref}"
+        " --report-prefix {params.prefix}"
+        " --engine-vcfeval-template {params.sdf}"
+        " --threads {threads}"
+        " --engine=vcfeval"
+        " --preprocess-truth"
+        " --target-regions {input.bed}"
+        " {params.truth}"
+        " {params.pwd}/{input.vcf}"
+        " &> {log}"

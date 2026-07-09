@@ -35,45 +35,31 @@ ginkgo_read_depth = ["2M", "40M"]
 copykit_binsizes = ["110kb", "220kb", "500kb", "1Mb"] 
 ginkgo_binsizes = ["1Mb"]
 
-types = [
-    "cn", # Copy number
-    "gl"  # Gain/Loss
-]
-
 wildcard_constraints:
     caller = '|'.join(callers),
     reads = '|'.join(copykit_read_depth + ["array"]),
     truth = '|'.join(truth_sets),
     binsize = '|'.join(copykit_binsizes + ["none"]),
-    type = '|'.join(types),
     sample = '|'.join(sample_list)
 
 rule all:
     input:
         expand(
-            "agreement/ginkgo/{reads}/{truth}/{binsize}.{type}.tsv", 
+            "agreement/ginkgo/{reads}/{truth}/{binsize}.stats.tsv", 
             reads=ginkgo_read_depth,
             truth=truth_sets, 
             binsize=ginkgo_binsizes, 
-            type=types,
         ),
         expand(
-            "agreement/copykit/{reads}/{truth}/{binsize}.{type}.tsv", 
+            "agreement/copykit/{reads}/{truth}/{binsize}.stats.tsv", 
             reads=copykit_read_depth,
             truth=truth_sets, 
             binsize=copykit_binsizes, 
-            type=types,
         ),
         expand(
-            "agreement/penncnv/array/{truth}/none.{type}.tsv", 
+            "agreement/penncnv/array/{truth}/none.stats.tsv", 
             truth=truth_sets, 
-            type=types,
-        ),
-        expand(
-            "agreement_truthsets.{type}.tsv",
-            type=types,
         )
-
 
 def get_query_seg(wildcards):
     if wildcards.caller == "copykit":
@@ -105,18 +91,18 @@ rule cnv_benchmark:
         query_seg = get_query_seg,
         truth_seg = get_truth_seg,
     output:
-        tsv = "agreement/{caller}/{reads}/{truth}/{binsize}.{type}.tsv"
-    log: "agreement/{caller}/{reads}/{truth}/{binsize}.{type}.tsv.log"
+        tsv = "agreement/{caller}/{reads}/{truth}/{binsize}.stats.tsv",
+        seg = "agreement/{caller}/{reads}/{truth}/{binsize}.agreements.seg",
+    log: "agreement/{caller}/{reads}/{truth}/{binsize}.stats.tsv.log"
     params:
         genome = genome,
+        prefix = "agreement/{caller}/{reads}/{truth}/{binsize}",
         script = "../../scripts/cnv_agreement.py",
-        gl_mode = lambda wc: "--gl" if "gl" in wc.type else "",
     shell:
         "python {params.script}"
         " {input.query_seg}"
         " {input.truth_seg}"
         " --fai {params.genome}"
         " --ploidy 2"
-        " {params.gl_mode}"
-        " > {output.tsv}"
-        " 2> {log}"
+        " --output-prefix {params.prefix}"
+        " &> {log}"

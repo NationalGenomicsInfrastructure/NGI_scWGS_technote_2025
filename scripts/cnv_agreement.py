@@ -6,175 +6,35 @@ Agreement is calculated as the fraction of the genome where the CNVs are the sam
 OBS! Only for female samples (no chrY).
 """
 import argparse
-from collections import defaultdict
-import dataclasses
 import logging
 import sys
 
-import numpy as np
+import pandas as pd
+import pyranges as pr
 
-from seg2vcf import parse_fai, parse_seg
+from seg2vcf import parse_fai
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-@dataclasses.dataclass
-class CNV:
-    chrom: str
-    start: int
-    end: int
-    cn: int
-    
-    def gain_loss(self, ploidy=2):
-        """
-        Return 0 for copy neutral, 1 for gain, -1 for loss.
-        """
-        if self.cn == ploidy:
-            return 0
-        elif self.cn > ploidy:
-            return 1
-        return -1
+def _drop_invalid_intervals(df, label):
+    """Drop malformed intervals where End <= Start.
 
-
-def get_cnvs(seg, ploidy=2):
+    Negative or zero interval lengths can otherwise create negative weighted
+    counts (FP/FN/TP) when length is used as a multiplier.
     """
-    Get CNVs from a SEG file.
-    """
-    chr1toX = set(f"chr{i}" for i in list(range(1, 23)) + ["X"])
-
-    data = defaultdict(list)
-    for name, chrom, start, end, cn in parse_seg(seg):
-        if cn == ploidy:
-            continue
-
-        if chrom not in chr1toX:
-            continue
-
-        data[name].append(CNV(chrom, start, end, cn))
-
-    return data
-
-
-def normalize_cnvs(cnvs, chr_lengths, ploidy=2):
-    """
-    Normalize CNVs by filling in gaps between CNVs with copy neutral segments.
-    """
-    normalized = []
-    current_pos = 0
-    current_chrom = None
-    for cnv in cnvs:
-        # New chromosome
-        if cnv.chrom != current_chrom:
-            # Add the copy neutral CNV if gap at end of the previous chromosome
-            if current_chrom is not None and current_pos < chr_lengths[current_chrom]:
-                normalized.append(
-                    CNV(current_chrom, current_pos, chr_lengths[current_chrom], ploidy)
-                )
-            
-            # Update current position
-            current_chrom = cnv.chrom
-            current_pos = 0
-        
-        # Add copy neutral segment if there is a gap between CNVs (or at start)
-        if cnv.start > current_pos:
-            normalized.append(CNV(cnv.chrom, current_pos, cnv.start, ploidy))
-
-        if cnv.end > chr_lengths[cnv.chrom]:
-            logger.warning(f"End position {cnv.end} is greater than chromosome length {chr_lengths[cnv.chrom]}.")
-            logger.warning(f"Truncating CNV to chromosome length.")
-            cnv.end = chr_lengths[cnv.chrom]
-
-        current_pos = cnv.end 
-        normalized.append(cnv)
- 
-    # Add the copy neutral CNV if gap at end of the last chromosome
-    if current_pos < chr_lengths[current_chrom]:
-        normalized.append(
-            CNV(current_chrom, current_pos, chr_lengths[current_chrom], ploidy)
+    invalid = df["End"] <= df["Start"]
+    n_invalid = int(invalid.sum())
+    if n_invalid:
+        logger.warning(
+            "Dropping %d malformed interval(s) from %s where End <= Start.",
+            n_invalid,
+            label,
         )
+        logger.debug("Malformed intervals:\n%s", df.loc[invalid])
+    return df.loc[~invalid].copy()
 
-    return normalized
-
-
-def group_by_chrom(cnvs):
-    """
-    Group CNVs by chromosome.
-    """
-    data = defaultdict(list)
-    for cnv in cnvs:
-        data[cnv.chrom].append(cnv)
-    
-    return data
-
-
-def assign_cn(intervals, cnvs, ploidy=2, gain_loss=False):
-    """
-    Assign CNV to intervals.
-    """
-    if gain_loss:
-        cn_array = np.zeros(len(intervals))
-    else:
-        cn_array = np.ones(len(intervals)) * ploidy
-    
-    for cnv in cnvs:
-        # Find intervals that are fully contained in the CNV
-        idx = ((intervals[:,0] >= cnv.start) & (intervals[:,1] <= cnv.end)).nonzero()[0]
-        
-        # Update CN for these intervals
-        cn = cnv.cn if not gain_loss else cnv.gain_loss(ploidy)
-        cn_array[idx] = cn
-
-    return cn_array
-
-
-def count_types(cnvs, ploidy=2, gain_loss=False):
-    """
-    Count the number of CNVs of each type.
-    """
-    types = defaultdict(int)
-    for cnv in cnvs:
-        cntype = cnv.cn if not gain_loss else cnv.gain_loss(ploidy)
-        types[cntype] += 1
-    return dict(types)
-
-
-def process_truth(truth_seg, chr_lengths, ploidy=2, gain_loss=False):
-    """
-    Process truth SEG file to get CNVs grouped by chromosome.
-    """
-    truth_cnvs = get_cnvs(truth_seg, ploidy)
-    
-    if len(truth_cnvs) != 1:
-        logger.error("Truth file should only have one sample.")
-        sys.exit(1)
-    
-    truth_cnvs = list(truth_cnvs.values())[0]
-
-    truth_types = count_types(truth_cnvs, ploidy, gain_loss)
-    logger.info(f"Truth CNVs: {len(truth_cnvs)} ({truth_types})")
-
-    truth_cnvs = normalize_cnvs(truth_cnvs, chr_lengths, ploidy)
-    truth_cnvs = group_by_chrom(truth_cnvs)
-    return truth_cnvs
-
-
-def parse_bed(bed_file):
-    """
-    Parse a BED file and return a list of tuples (chrom, start, end).
-    """
-    regions_by_chrom = defaultdict(list)
-    with open(bed_file) as f:
-        for line in f:
-            if line.startswith("#"):
-                continue
-            fields = line.strip().split()
-            chrom = fields[0]
-            start = int(fields[1])
-            end = int(fields[2])
-            regions_by_chrom[chrom].append((start, end))
-            
-    return regions_by_chrom
 
 
 def main(args):
@@ -183,63 +43,167 @@ def main(args):
         logger.info(f" {k}: {v}")
     logger.info("-"*30)
 
+    run(
+        fai=args.fai,
+        truth_seg=args.truth,
+        query_seg=args.query,
+        ploidy=args.ploidy,
+        prefix=args.output_prefix
+    )
+
+def run(
+        fai,
+        truth_seg,
+        query_seg,
+        ploidy=2,
+        prefix="cnv_agreement",
+):
     logger.info("Reading reference genome lengths...")
-    chr_lengths = {chrom: length for chrom, length in parse_fai(args.fai)}
+    chr_lengths = {chrom: length for chrom, length in parse_fai(fai)}
+    chr1toX = set(f"chr{i}" for i in list(range(1, 23)) + ["X"])
 
-    excluded_regions = {}
-    if args.exclude:
-        logger.info("Reading regions to exclude...")
-        excluded_regions = parse_bed(args.exclude)
+    # Background for filling out neutral regions not covered by CNVs
+    background = pd.DataFrame([
+        {"Chromosome": chrom, "Start": 0, "End": length, "CopyNumber": ploidy}
+        for chrom, length in chr_lengths.items()
+    ])
+    background_pr = pr.PyRanges(background)
 
-    truth_cnvs = process_truth(args.truth, chr_lengths, args.ploidy, args.gl)
+    # Load truth set 
+    truth_seg_df = pd.read_csv(
+        truth_seg, 
+        sep="\t", 
+        header=None, 
+        skiprows=2, 
+        names=["Name", "Chromosome", "Start", "End", "CopyNumber"],
+        dtype={"Name": str, "Chromosome": str, "Start": int, "End": int, "CopyNumber": int}
+    )
 
-    all_querys = get_cnvs(args.query, args.ploidy)
+    # Check that truth file has only one sample
+    if len(truth_seg_df["Name"].unique()) != 1:
+        logger.error("Truth file should only have one sample.")
+        sys.exit(1)
 
-    for name, query_cnvs in all_querys.items():
-        logger.info(f"Processing {name}...")
-        query_types = count_types(query_cnvs, args.ploidy, args.gl)
-        logger.info(f"Query CNVs: {len(query_cnvs)} ({query_types})")
-        
-        query_cnvs = normalize_cnvs(query_cnvs, chr_lengths, args.ploidy)
-        query_cnvs = group_by_chrom(query_cnvs)
+    # Create truth PyRanges
+    truth_cnvs_df = truth_seg_df[["Chromosome", "Start", "End", "CopyNumber"]]
+    truth_cnvs_df = truth_cnvs_df[truth_cnvs_df["Chromosome"].isin(chr1toX)]
+    truth_cnvs_df = _drop_invalid_intervals(truth_cnvs_df, "truth")
+    truth_cnvs_pr = pr.PyRanges(truth_cnvs_df)
 
-        chroms_union = set(truth_cnvs.keys()) | set(query_cnvs.keys())
-        logger.info(f"Chromosomes: {','.join(sorted(chroms_union))}")
-        agree_length = 0
-        total_length = 0
-        for chrom in chroms_union:
-            truth = truth_cnvs.get(chrom, [])
-            query = query_cnvs.get(chrom, [])
+    # Load query set    
+    query_seg_df = pd.read_csv(
+        query_seg, 
+        sep="\t", 
+        skiprows=2, 
+        header=None, 
+        names=["Name", "Chromosome", "Start", "End", "CopyNumber"],
+        dtype={"Name": str, "Chromosome": str, "Start": int, "End": int, "CopyNumber": int}
+    )
 
-            # Get all positions
-            truth_positions = set(cnv.start for cnv in truth) | set(cnv.end for cnv in truth)
-            query_positions = set(cnv.start for cnv in query) | set(cnv.end for cnv in query)
-            positions = sorted(truth_positions | query_positions)
+    seg = []
+    output_stats = prefix + ".stats.tsv"
+    with open(output_stats, "w") as f:
+        print(
+            "Name",
+            "TotalBases",
+            "TPs",
+            "FPs",
+            "FNs",
+            "Agreement",
+            "Precision",
+            "Recall",
+            "F1Score",
+            sep="\t",
+            file=f
+        )       
 
-            # Get intervals
-            intervals = np.array([(positions[i], positions[i+1]) for i in range(len(positions)-1)])
+        # Loop over queries and calculate agreement    
+        for name, df in query_seg_df.groupby("Name"):
+            # Create query PyRanges
+            query_cnvs_df = df[["Chromosome", "Start", "End", "CopyNumber"]]
+            query_cnvs_df = _drop_invalid_intervals(query_cnvs_df, f"query sample {name}")
+            query_cnvs_pr = pr.PyRanges(query_cnvs_df)
+            
+            # Add missing neutral regions if any
+            missing = background_pr.subtract(query_cnvs_pr)
+            query_cnvs_df = pd.concat([query_cnvs_pr.df,missing.df])
+            query_cnvs_pr = pr.PyRanges(query_cnvs_df)
 
-            # Calculate CN for each interval 
-            truth_cn = assign_cn(intervals, truth, args.ploidy, args.gl)
-            query_cn = assign_cn(intervals, query, args.ploidy, args.gl)
+            # Intersect truth and query to get query CNVs
+            query_cnvs_pr = query_cnvs_pr.intersect(truth_cnvs_pr)
+
+            # Intersect truth and query to get truth CNVs
+            truth_cnvs_pr_inter = truth_cnvs_pr.intersect(query_cnvs_pr)
+
+            # Merge truth and query
+            query_cnvs_pr = query_cnvs_pr.df.merge(truth_cnvs_pr_inter.df, how="left", on=["Chromosome", "Start", "End"], suffixes=("", "Truth"))
+
+            # Evaluate agreement / True positives
+            query_cnvs_pr["Agree"] = (query_cnvs_pr["CopyNumber"] == query_cnvs_pr["CopyNumberTruth"]).astype(int)
+            disagree = query_cnvs_pr["Agree"] == 0
+
+            # For the disagreements, calculate false positives and false negatives
+            # FP = CNV called in query
+            # FN = CNV called in truth
+            query_cnvs_pr["FP"] = ((query_cnvs_pr["CopyNumberTruth"] == ploidy) & disagree).astype(int)
+            query_cnvs_pr["FN"] = ((query_cnvs_pr["CopyNumberTruth"] != ploidy) & disagree).astype(int)
+            
+            query_cnvs_pr = pr.PyRanges(query_cnvs_pr)
+
+            # Calculate weight and length
+            query_cnvs_pr.Length = query_cnvs_pr.End - query_cnvs_pr.Start
+            assert (query_cnvs_pr.Length >= 0).all(), "Negative interval lengths found. Check input SEG files."
+            query_cnvs_pr.TPs = query_cnvs_pr.Length * query_cnvs_pr.Agree
+            assert (query_cnvs_pr.TPs >= 0).all(), "Negative TP counts found. Check input SEG files."
+            query_cnvs_pr.FPs = query_cnvs_pr.Length * query_cnvs_pr.FP
+            assert (query_cnvs_pr.FPs >= 0).all(), "Negative FP counts found. Check input SEG files."
+            query_cnvs_pr.FNs = query_cnvs_pr.Length * query_cnvs_pr.FN
+            assert (query_cnvs_pr.FNs >= 0).all(), "Negative FN counts found. Check input SEG files."
 
             # Calculate agreement
-            agree = intervals[np.where(truth_cn == query_cn)]
-            agree_length += np.sum(agree[:,1] - agree[:,0])
+            total_bases = query_cnvs_pr.Length.sum()
+            total_TP = query_cnvs_pr.TPs.sum()
+            total_FP = query_cnvs_pr.FPs.sum()
+            total_FN = query_cnvs_pr.FNs.sum()
+            agreement = total_TP / total_bases if total_bases > 0 else 0.0  # this is the jaccard similarity/index
+            precision_denom = total_TP + total_FP
+            recall_denom = total_TP + total_FN
+            precision = total_TP / precision_denom if precision_denom > 0 else 0.0
+            recall = total_TP / recall_denom if recall_denom > 0 else 0.0
+            f1_denom = precision + recall
+            f1_score = 2 * (precision * recall) / f1_denom if f1_denom > 0 else 0.0
 
-            length = np.sum(intervals[:,1] - intervals[:,0])
-            assert length == chr_lengths[chrom], f"Length mismatch for chromosome {chrom}: {length} != {chr_lengths[chrom]}"
+            # Write stats
+            print(
+                name, 
+                total_bases, 
+                total_TP, 
+                total_FP, 
+                total_FN, 
+                agreement,
+                precision,
+                recall,
+                f1_score,
+                sep="\t", 
+                file=f
+            )
 
-            total_length += length
+            # Save data for visualization of agreement
+            s = query_cnvs_pr[["Chromosome", "Start", "End", "Agree"]].df
+            s["Agree"] = s["Agree"].replace({0: 4, 1: 0}) # --> Agree=0 (blue), NotAgree=4 (red)
+            s["Id"] = name
+            seg.append(s)
 
-        agree_fraction = agree_length / total_length
+    # Write SEG for visualization of agreement
+    seg = pd.concat(seg)
+    seg = seg[["Id", "Chromosome", "Start", "End", "Agree"]]
+    output_seg = prefix + ".agreements.seg"
+    with open(output_seg, "w") as f:
+        print("#type=COPY_NUMBER", file=f)
+        print("id\tchromosome\tstart\tend\tcn", file=f)
 
-        logger.info(f"Agreement: {agree_length:,} / {total_length:,} ({agree_fraction:.2%})")
+    seg.to_csv(output_seg, mode="a", sep="\t", index=False, header=False)
 
-        logger.info("-"*30)
-
-        print(f"{name}\t{agree_fraction}")
-    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
@@ -247,7 +211,6 @@ if __name__ == "__main__":
     parser.add_argument("truth", help="Truth SEG file. Should only have one sample.")
     parser.add_argument("-f", "--fai", help="Reference fasta index file", required=True)
     parser.add_argument("-p", "--ploidy", help="Ploidy. Default: %(default)s", type=int, default=2)
-    parser.add_argument("--gl", "--gain-loss", help="Only consider gains and losses", action="store_true")
-    parser.add_argument("-e", "--exclude", help="BED with regions to exclude from analysis", nargs="+", default=[])
+    parser.add_argument("-o", "--output-prefix", help="Output prefix. Default: %(default)s", default="cnv_agreement")
     args = parser.parse_args()
     main(args)
